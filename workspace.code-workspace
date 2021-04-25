@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "modem-esp8266",
+			"path": "modem-esp8266"
+		},
+		{
+			"name": "due-radio",
+			"path": "due-radio"
+		}
+	],
+	"settings": {}
+}
