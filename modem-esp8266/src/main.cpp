@@ -23,24 +23,23 @@ AudioGeneratorMP3 *g_mp3;
 AudioFileSourceICYStream *g_file;
 AudioFileSourceBuffer *g_buff;
 AudioOutputSerialWAV *g_out;
+bool g_is_radio_streaming = false;
 
 enum class program_state {
-  wait_for_init,
   wait_for_command,
   retrieve_command_data,
-  streaming_radio,
 };
 
 enum {
-  command_no_op = '0',//0x00,
-  command_connect = 'C',//0x01,
-  command_get_connection_info = 0x02,
-  command_start_stream = 'S',//0x03,
-  command_stop_stream = 'E',//0x04,
+  command_no_op = '0',
+  command_status = 's',
+  command_connect = 'c',
+  command_get_connection_info = 'i',
+  command_start_stream = 'S',
+  command_stop_stream = 'E',
 };
 
-program_state g_state = program_state::wait_for_init;
-int g_received_no_op_count = 0;
+program_state g_state = program_state::wait_for_command;
 uint8_t g_command = command_no_op;
 
 // Called when a metadata event occurs (i.e. an ID3 tag, an ICY block, etc.
@@ -82,43 +81,18 @@ void setup() {
 }
 
 void loop() {
-  run_stream();
-  /*switch (g_state) {
-    case program_state::wait_for_init:
-      run_wait_for_init();
-      break;
+  switch (g_state) {
     case program_state::wait_for_command:
       run_wait_for_command();
       break;
     case program_state::retrieve_command_data:
       run_retrieve_command_data();
       break;
-    case program_state::streaming_radio:
+  }
+
+  if (g_is_radio_streaming) {
       run_stream();
-      break;
-  }*/
-}
-
-void run_wait_for_init() {
-  Serial.write('0' /* 0x00 */);
-
-  int serial_available = Serial.available();
-
-  if (serial_available > 0) {
-    int incoming_byte = Serial.read();
-
-    if (incoming_byte == command_no_op) {
-      g_received_no_op_count++;
-    } else {
-      g_received_no_op_count = 0;
-    }
   }
-
-  if (g_received_no_op_count > 8) {
-    g_state = program_state::wait_for_command;
-  }
-
-  delay(100);
 }
 
 void run_wait_for_command() {
@@ -126,16 +100,23 @@ void run_wait_for_command() {
 
   if (serial_available > 0) {
     g_command = Serial.read();
+    g_state = program_state::retrieve_command_data;
   }
 }
 
 void run_retrieve_command_data(void) {
+  program_state next_state = program_state::wait_for_command;
+
   switch (g_command) {
     case command_no_op:
-      g_state = program_state::wait_for_command;
       break;
+    case command_status: {
+      Serial.write("OK");
+
+      break;
+    }
     case command_connect: {
-      /*uint8_t ssid_length, password_length;
+      uint8_t ssid_length, password_length;
       
       while (!Serial.available()) {}
       ssid_length = Serial.read();
@@ -155,16 +136,27 @@ void run_retrieve_command_data(void) {
         password += Serial.read();
       } while (password_read_index <= password_length);
 
-      run_command_connect(ssid, password);*/
+      run_command_connect(ssid, password);
 
       break;
     }
     case command_get_connection_info:
+      // TODO
+
       break;
     case command_start_stream:
+      // TODO: Stream args
+
       run_command_start_stream();
+
+      break;
+    case command_stop_stream:
+      run_command_stop_stream();
+
       break;
   }
+
+  g_state = next_state;
 }
 
 void run_stream(void) {
@@ -203,11 +195,12 @@ void run_command_start_stream() {
   g_mp3->RegisterStatusCB(StatusCallback, (void*)"mp3");
   g_mp3->begin(g_buff, g_out);
 
-  g_state = program_state::streaming_radio;
+  
+  g_is_radio_streaming = true;
 }
 
 void run_command_stop_stream(void) {
   g_mp3->stop();
-
-  g_state = program_state::wait_for_command;
+  
+  g_is_radio_streaming = false;
 }
