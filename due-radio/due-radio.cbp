@@ -37,13 +37,21 @@
 		<Unit filename="app/include/asf.h" />
 		<Unit filename="app/include/common.h" />
 		<Unit filename="app/include/conf_clock.h" />
+		<Unit filename="app/include/console.h" />
 		<Unit filename="app/include/dac.h" />
 		<Unit filename="app/include/esp_module.h" />
+		<Unit filename="app/include/fifo.h" />
 		<Unit filename="app/include/lcd.h" />
+		<Unit filename="app/src/console.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="app/src/dac.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="app/src/esp_module.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="app/src/fifo.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="app/src/lcd.c">
@@ -52,6 +60,7 @@
 		<Unit filename="app/src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="app/src/serial_console.d" />
 		<Unit filename="archive.sh" />
 		<Unit filename="asf/common/boards/board.h" />
 		<Unit filename="asf/common/services/clock/dfll.h" />
@@ -76,6 +85,12 @@
 		<Unit filename="asf/common/services/ioport/ioport.h" />
 		<Unit filename="asf/common/services/ioport/sam/ioport_gpio.h" />
 		<Unit filename="asf/common/services/ioport/sam/ioport_pio.h" />
+		<Unit filename="asf/common/services/serial/sam_uart/module_config/conf_uart_serial.h" />
+		<Unit filename="asf/common/services/serial/sam_uart/uart_serial.h" />
+		<Unit filename="asf/common/services/serial/serial.h" />
+		<Unit filename="asf/common/services/serial/usart_serial.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="asf/common/utils/interrupt.h" />
 		<Unit filename="asf/common/utils/interrupt/interrupt_sam_nvic.c">
 			<Option compilerVar="CC" />

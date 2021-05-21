@@ -12,9 +12,9 @@
  *
  */
 #include <sam3x8e.h>
+#include <arduino_due_x/arduino_due_x.h>
 #include <pio.h>
 #include <delay.h>
-
 
 // From module: Common SAM compiler driver
 #include <compiler.h>
@@ -52,7 +52,7 @@
 #include <sysclk.h>
 
 // From module: TC - Timer Counter
-//#include <tc.h>
+#include <tc.h>
 
 // From module: UART - Univ. Async Rec/Trans
 #include <uart.h>

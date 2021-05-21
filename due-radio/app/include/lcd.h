@@ -19,10 +19,9 @@
 */
 
 #include "common.h"
+#include <ioport.h>
 
 __EXTERN_C_BEGIN
-
-#include <ioport.h>
 
 /**
 * HD44780U instruction set

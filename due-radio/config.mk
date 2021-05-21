@@ -66,6 +66,7 @@ CSRCS = \
 	asf/sam/drivers/uart/uart.c										\
 	asf/sam/drivers/usart/usart.c									\
 	asf/sam/drivers/dacc/dacc.c									    \
+	asf/sam/drivers/tc/tc.c									    	\
 
 
 # List of assembler source files.
@@ -92,6 +93,7 @@ INC_PATH = \
 	asf/sam/drivers/uart					    \
 	asf/sam/drivers/usart					    \
 	asf/sam/drivers/dacc					    \
+	asf/sam/drivers/tc						    \
 
 
 

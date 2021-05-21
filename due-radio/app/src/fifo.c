@@ -1,8 +1,6 @@
 #include "fifo.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__EXTERN_C_BEGIN
 
 uint32_t fifo_read(fifo_t* fifo, uint8_t* data_buffer, uint32_t n) {
     uint32_t bytes_read = 0;
@@ -69,6 +67,4 @@ void fifo_discard(fifo_t* fifo) {
     fifo->write_idx = 0;
 }
 
-#ifdef __cplusplus
-}
-#endif
+__EXTERN_C_END

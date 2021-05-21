@@ -1,0 +1,16 @@
+{
+    "files.exclude": {
+        "**/*.d": true,
+        "**/*.o": true
+    },
+    "files.associations": {
+        "fifo.h": "c",
+        "*.ipp": "c",
+        "cstdio": "c",
+        "console.h": "c",
+        "common.h": "c",
+        "asf.h": "c",
+        "sam3x8e.h": "c",
+        "stdint.h": "c"
+    }
+}

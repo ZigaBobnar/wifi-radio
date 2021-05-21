@@ -1,8 +1,6 @@
 #include "console.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__EXTERN_C_BEGIN
 
 console_t* active_console = NULL;
 
@@ -27,7 +25,7 @@ void console_init(console_t* console) {
     };
 
     uart_init(UART, &uart_opts);
-    
+
     active_console = console;
 }
 
@@ -35,6 +33,7 @@ void console_enable() {
     UART->UART_CR = UART_CR_RSTSTA | UART_CR_RSTTX | UART_CR_RSTRX;
 
     UART->UART_IER = UART_IER_RXRDY;
+    NVIC_EnableIRQ(UART_IRQn);
 
 	UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
 }
@@ -43,11 +42,11 @@ void console_enable() {
 void console_put_char(uint8_t value) {
     while (!(UART->UART_SR & UART_SR_TXRDY)) {}
 
-    UART->UART_THR = value;
+    UART->UART_THR = UART_THR_TXCHR(value);
 }
 
 void console_put_string(const char* str) {
-    char* c = str;
+    const char* c = str;
 
     while (*c != 0) {
         console_put_char(*c);
@@ -65,7 +64,7 @@ void console_wait_until_char_ready() {
 
 uint8_t console_get_char() {
     uint8_t buf;
-    
+
     fifo_read(&console_rx_fifo, &buf, 1);
 
     return buf;
@@ -73,7 +72,7 @@ uint8_t console_get_char() {
 
 uint8_t console_peek_char() {
     uint8_t buf;
-    
+
     fifo_peek(&console_rx_fifo, &buf, 1);
 
     return buf;
@@ -86,6 +85,4 @@ void UART_Handler() {
     }
 }
 
-#ifdef __cplusplus
-}
-#endif
+__EXTERN_C_END

@@ -4,6 +4,10 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 
+app/include/config.h
+cscope.out
+*.cscope_file_list
+
 # Build files
 *.o
 *.d

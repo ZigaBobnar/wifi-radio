@@ -1,11 +1,9 @@
 #ifndef FIFO_H_
 #define FIFO_H_
 
-#include <asf.h>
+#include "common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__EXTERN_C_BEGIN
 
 struct _fifo {
     uint32_t read_idx;
@@ -64,8 +62,6 @@ uint32_t fifo_write_single(fifo_t* fifo, uint8_t value);
  */
 void fifo_discard(fifo_t* fifo);
 
-#ifdef __cplusplus
-}
-#endif
+__EXTERN_C_END
 
 #endif  // FIFO_H_
