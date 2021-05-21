@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="due-radio" />
+		<Option makefile_is_custom="1" />
+		<Option execution_dir="." />
+		<Option pch_mode="2" />
+		<Option compiler="arm-elf-gcc" />
+		<Build>
+			<Target title="all">
+				<Option output="due-radio.elf" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="5" />
+				<Option compiler="arm-elf-gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<MakeCommands>
+					<Build command="$make all PN=${TARGET_OUTPUT_BASENAME}" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make clean PN=${TARGET_OUTPUT_BASENAME}" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q all PN=${TARGET_OUTPUT_BASENAME}" />
+					<SilentBuild command="$make all PN=${TARGET_OUTPUT_BASENAME} &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="Makefile" />
+		<Unit filename="app/include/asf.h" />
+		<Unit filename="app/include/conf_clock.h" />
+		<Unit filename="app/src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="archive.sh" />
+		<Unit filename="asf/common/boards/board.h" />
+		<Unit filename="asf/common/services/clock/dfll.h" />
+		<Unit filename="asf/common/services/clock/genclk.h" />
+		<Unit filename="asf/common/services/clock/osc.h" />
+		<Unit filename="asf/common/services/clock/pll.h" />
+		<Unit filename="asf/common/services/clock/sam3x/genclk.h" />
+		<Unit filename="asf/common/services/clock/sam3x/osc.h" />
+		<Unit filename="asf/common/services/clock/sam3x/pll.h" />
+		<Unit filename="asf/common/services/clock/sam3x/sysclk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/common/services/clock/sam3x/sysclk.h" />
+		<Unit filename="asf/common/services/clock/sysclk.h" />
+		<Unit filename="asf/common/services/delay/delay.h" />
+		<Unit filename="asf/common/services/delay/sam/cycle_counter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/common/services/delay/sam/cycle_counter.h" />
+		<Unit filename="asf/common/services/gpio/gpio.h" />
+		<Unit filename="asf/common/services/gpio/sam_gpio/sam_gpio.h" />
+		<Unit filename="asf/common/utils/interrupt.h" />
+		<Unit filename="asf/common/utils/interrupt/interrupt_sam_nvic.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/common/utils/interrupt/interrupt_sam_nvic.h" />
+		<Unit filename="asf/common/utils/parts.h" />
+		<Unit filename="asf/sam/boards/arduino_due_x/arduino_due_x.h" />
+		<Unit filename="asf/sam/boards/arduino_due_x/debug_scripts/gcc/arduino_due_x_flash.gdb" />
+		<Unit filename="asf/sam/boards/arduino_due_x/debug_scripts/gcc/arduino_due_x_sram.gdb" />
+		<Unit filename="asf/sam/boards/arduino_due_x/init.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/pio/pio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/pio/pio.h" />
+		<Unit filename="asf/sam/drivers/pio/pio_handler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/pio/pio_handler.h" />
+		<Unit filename="asf/sam/drivers/pmc/pmc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/pmc/pmc.h" />
+		<Unit filename="asf/sam/drivers/pmc/sleep.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/pmc/sleep.h" />
+		<Unit filename="asf/sam/drivers/uart/uart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/uart/uart.h" />
+		<Unit filename="asf/sam/drivers/usart/usart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/usart/usart.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_adc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_can.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_chipid.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_dacc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_dmac.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_efc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_emac.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_gpbr.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_hsmci.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_matrix.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_pdc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_pio.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_pmc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_pwm.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_rstc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_rtc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_rtt.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_sdramc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_smc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_spi.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_ssc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_supc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_tc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_trng.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_twi.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_uart.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_uotghs.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_usart.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/component/component_wdt.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_adc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_can0.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_can1.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_chipid.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_dacc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_dmac.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_efc0.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_efc1.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_emac.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_gpbr.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_hsmci.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_matrix.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_pioa.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_piob.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_pioc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_piod.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_pioe.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_piof.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_pmc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_pwm.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_rstc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_rtc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_rtt.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_sdramc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_smc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_spi0.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_spi1.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_ssc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_supc.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_tc0.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_tc1.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_tc2.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_trng.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_twi0.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_twi1.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_uart.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_uotghs.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_usart0.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_usart1.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_usart2.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_usart3.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/instance/instance_wdt.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/pio/pio_sam3x8e.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/sam3x8e.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/include/sam3xa.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/source/templates/exceptions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/utils/cmsis/sam3x/source/templates/exceptions.h" />
+		<Unit filename="asf/sam/utils/cmsis/sam3x/source/templates/gcc/startup_sam3x.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/utils/cmsis/sam3x/source/templates/system_sam3x.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/utils/cmsis/sam3x/source/templates/system_sam3x.h" />
+		<Unit filename="asf/sam/utils/compiler.h" />
+		<Unit filename="asf/sam/utils/header_files/io.h" />
+		<Unit filename="asf/sam/utils/linker_scripts/sam3x/sam3x8/gcc/flash.ld" />
+		<Unit filename="asf/sam/utils/linker_scripts/sam3x/sam3x8/gcc/sram.ld" />
+		<Unit filename="asf/sam/utils/make/Makefile.sam.in" />
+		<Unit filename="asf/sam/utils/preprocessor/mrepeat.h" />
+		<Unit filename="asf/sam/utils/preprocessor/preprocessor.h" />
+		<Unit filename="asf/sam/utils/preprocessor/stringz.h" />
+		<Unit filename="asf/sam/utils/preprocessor/tpaste.h" />
+		<Unit filename="asf/sam/utils/status_codes.h" />
+		<Unit filename="asf/sam/utils/syscalls/gcc/syscalls.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/thirdparty/CMSIS/include/core_cm3.h" />
+		<Unit filename="asf/thirdparty/CMSIS/include/core_cmFunc.h" />
+		<Unit filename="asf/thirdparty/CMSIS/include/core_cmInstr.h" />
+		<Unit filename="clone.sh" />
+		<Unit filename="config.mk" />
+		<Unit filename="openocd.cfg" />
+		<Unit filename="startdbg.sh" />
+		<Unit filename="stopdbg.sh" />
+		<Extensions>
+			<debugger>
+				<remote_debugging target="all">
+					<options conn_type="0" ip_address="localhost" ip_port="3333" additional_cmds="d&#x0A;shell sleep 0.1" extended_remote="1" additional_shell_cmds_before="./startdbg.sh $(TARGET_OUTPUT_BASENAME)" />
+				</remote_debugging>
+			</debugger>
+			<envvars set="default" />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
