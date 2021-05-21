@@ -65,6 +65,7 @@ CSRCS = \
 	asf/sam/drivers/pio/pio.c										\
 	asf/sam/drivers/uart/uart.c										\
 	asf/sam/drivers/usart/usart.c									\
+	asf/sam/drivers/dacc/dacc.c									    \
 
 
 # List of assembler source files.
@@ -85,10 +86,12 @@ INC_PATH = \
 	asf/common/services/gpio					\
 	asf/common/services/clock					\
 	asf/common/services/delay					\
+	asf/common/services/ioport					\
 	asf/sam/drivers/pmc							\
 	asf/sam/drivers/pio							\
 	asf/sam/drivers/uart					    \
 	asf/sam/drivers/usart					    \
+	asf/sam/drivers/dacc					    \
 
 
 
