@@ -5,16 +5,20 @@
 #include "lcd.h"
 #include "fifo.h"
 
+/**
+ * ESP module board driver
+ *
+ * This allows communication with ESP-8266 (running appropriate firmware)
+ * connected through USART0 port.
+ *
+ * USART0: RX1 and TX1 on Arduino Due
+ */
+
 #ifndef ESP_RX_QUEUE_SIZE
 #define ESP_RX_QUEUE_SIZE 128
 #endif  // ESP_RX_QUEUE_SIZE
 
 __EXTERN_C_BEGIN
-
-/**
- * This is a simple driver for ESP-8266 module connected through USART0 port.
- * USART0 => pins RX1, TX1 on Arduino Due
- */
 
 extern uint8_t esp_rx_data;
 extern lcd_t* default_lcd;
@@ -30,7 +34,7 @@ void esp_module_stop_stream(void);
 void esp_module_tx_put_char(uint8_t value);
 bool esp_module_rx_read(void);
 bool esp_module_rx_read_wait(void);
-bool esp_module_rx_read_wait_timeout(const uint32_t timeout_ms);
+bool esp_module_rx_read_wait_timeout(const int32_t timeout_ms);
 bool esp_module_rx_char_ready(void);
 void esp_module_rx_wait_until_char_ready(void);
 void esp_module_clear_status(void);

@@ -3,12 +3,6 @@
 
 #include "common.h"
 
-#ifndef TIMEGUARD_CUSTOM_CONFIG
-#define TIMEGUARD_TCn TC0
-#define TIMEGUARD_CHANNEL (1)
-#define TIMEGUARD_ID_TCx ID_TC1
-#endif  // TIMEGUARD_CUSTOM_CONFIG
-
 /**
  * TimeGuard
  * 
@@ -17,6 +11,12 @@
  * 
  * It uses hardware timer counter TC0, channel 1 as default.
  */
+
+#ifndef TIMEGUARD_CUSTOM_CONFIG
+#define TIMEGUARD_TCn TC0
+#define TIMEGUARD_CHANNEL (1)
+#define TIMEGUARD_ID_TCx ID_TC1
+#endif  // TIMEGUARD_CUSTOM_CONFIG
 
 __EXTERN_C_BEGIN
 

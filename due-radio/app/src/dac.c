@@ -26,6 +26,7 @@ void dac_write(dac_t* dac, uint32_t value) {
 	dacc_write_conversion_data(DACC, value);
 }
 
+/*
 void dac_activate(dac_t* dac) {
 	SysTick_Config(sysclk_get_cpu_hz() / (dac->sampling_frequency));
 
@@ -45,5 +46,6 @@ void SysTick_Handler(void) {
 		}
 	}
 }
+*/
 
 __EXTERN_C_END

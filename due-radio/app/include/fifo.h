@@ -3,6 +3,16 @@
 
 #include "common.h"
 
+/**
+ * FIFO (First In, First Out) buffer
+ * 
+ * Fifo cyclic buffer can be used whenewer a program needs to always append
+ * data after the current position in memory without the need for infinite
+ * memory size. The buffer can be read all the way to the most recently written
+ * data. Existing buffer data must be read (read index advances) before it can
+ * be overwritten.
+ */
+
 __EXTERN_C_BEGIN
 
 struct _fifo {

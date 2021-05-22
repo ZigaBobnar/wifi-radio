@@ -190,7 +190,7 @@ bool esp_module_rx_read_wait() {
     return esp_module_rx_read_wait_timeout(500);
 }
 
-bool esp_module_rx_read_wait_timeout(const uint32_t timeout_ms) {
+bool esp_module_rx_read_wait_timeout(const int32_t timeout_ms) {
     int32_t read_start_ms = timeguard_get_time_ms();
 
     while (!esp_module_rx_char_ready()) {

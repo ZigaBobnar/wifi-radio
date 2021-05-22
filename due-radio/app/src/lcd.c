@@ -1,5 +1,7 @@
 #include "lcd.h"
 #include <delay.h>
+#include <stdarg.h>
+#include <memory.h>
 
 __EXTERN_C_BEGIN
 
@@ -95,6 +97,42 @@ void lcd_write_string(lcd_t* lcd, uint8_t* value) {
 
         lcd_driver_raw_send(lcd, char_value, false);
     }
+}
+
+void lcd_write_formatted(lcd_t* lcd, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    char buffer[33];
+
+    vsnprintf(buffer, 33, format, args);
+    memcpy(lcd->_lcd_string, buffer, 32 * sizeof(uint8_t));
+    
+    lcd_write_lcd_string(lcd);
+}
+
+void lcd_write_upper_formatted(lcd_t* lcd, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    char buffer[17];
+
+    vsnprintf(buffer, 17, format, args);
+    memcpy(lcd->lcd_upper, buffer, 16 * sizeof(uint8_t));
+
+    lcd_write_lcd_string(lcd);
+}
+
+void lcd_write_lower_formatted(lcd_t* lcd, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    char buffer[17];
+
+    vsnprintf(buffer, 17, format, args);
+    memcpy(lcd->lcd_lower, buffer, 16 * sizeof(uint8_t));
+
+    lcd_write_lcd_string(lcd);
 }
 
 void lcd_write_string_at_cursor(lcd_t* lcd, uint8_t* value, uint8_t length) {

@@ -119,6 +119,24 @@ void lcd_write_lcd_string(lcd_t* lcd);
 void lcd_write_string(lcd_t* lcd, uint8_t* value);
 
 /**
+ * Write formatted string to the LCD using sprintf.
+ */
+void lcd_write_formatted(lcd_t* lcd, const char* format, ...)
+    __attribute__((format (__printf__, 2, 0)));
+
+/**
+ * Write formatted string to the upper row of LCD using sprintf.
+ */
+void lcd_write_upper_formatted(lcd_t* lcd, const char* format, ...)
+    __attribute__((format (__printf__, 2, 0)));
+
+/**
+ * Write formatted string to the lower row of the LCD using sprintf.
+ */
+void lcd_write_lower_formatted(lcd_t* lcd, const char* format, ...)
+    __attribute__((format (__printf__, 2, 0)));
+
+/**
 * Write string to the current position of LCD cursor
 * @param value String to write to display
 * @param length Number of characters of string to send to display

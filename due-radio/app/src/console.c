@@ -1,8 +1,7 @@
 #include "console.h"
+#include <stdarg.h>
 
 __EXTERN_C_BEGIN
-
-console_t* active_console = NULL;
 
 uint8_t console_rx_fifo_buff[CONSOLE_RX_QUEUE_SIZE];
 fifo_t console_rx_fifo = {
@@ -12,7 +11,8 @@ fifo_t console_rx_fifo = {
     .buffer      = console_rx_fifo_buff,
 };
 
-void console_init(console_t* console) {
+
+void console_init() {
     sysclk_enable_peripheral_clock(ID_PIOA);
     pio_set_peripheral(PIOA, PIO_PERIPH_A, PINS_UART);
     pio_pull_up(PIOA, PINS_UART, PIO_PULLUP);
@@ -20,13 +20,11 @@ void console_init(console_t* console) {
     sysclk_enable_peripheral_clock(ID_UART);
     sam_uart_opt_t uart_opts = {
         .ul_mck = SystemCoreClock,
-        .ul_baudrate = console->baud,
+        .ul_baudrate = CONSOLE_BAUD,
         .ul_mode = UART_MR_CHMODE_NORMAL | UART_MR_PAR_NO,
     };
 
     uart_init(UART, &uart_opts);
-
-    active_console = console;
 }
 
 void console_enable() {
@@ -36,6 +34,11 @@ void console_enable() {
     NVIC_EnableIRQ(UART_IRQn);
 
 	UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
+}
+
+
+void console_process_input() {
+    // TODO: Implement.
 }
 
 
@@ -53,6 +56,23 @@ void console_put_string(const char* str) {
         c++;
     }
 }
+
+
+void console_put_formatted(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    size_t required_size = vsnprintf(NULL, 0, format, args) + 1;
+
+    char* buffer = malloc(required_size + 1);
+
+    vsnprintf(buffer, required_size, format, args);
+
+    console_put_string(buffer);
+
+    free(buffer);
+}
+
 
 bool console_char_ready() {
     return fifo_has_next_item(&console_rx_fifo);
