@@ -11,6 +11,8 @@
         "common.h": "c",
         "asf.h": "c",
         "sam3x8e.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "condition_variable": "c",
+        "future": "c"
     }
 }

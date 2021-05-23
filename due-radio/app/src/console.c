@@ -1,5 +1,6 @@
 #include "console.h"
 #include <stdarg.h>
+#include "esp_module.h"
 
 __EXTERN_C_BEGIN
 
@@ -11,6 +12,7 @@ fifo_t console_rx_fifo = {
     .buffer      = console_rx_fifo_buff,
 };
 
+int console_rx_line_ready = 0;
 
 void console_init() {
     sysclk_enable_peripheral_clock(ID_PIOA);
@@ -38,7 +40,45 @@ void console_enable() {
 
 
 void console_process_input() {
-    // TODO: Implement.
+    if (console_rx_line_ready > 0) {
+        char* input_line = calloc(128, sizeof(char));
+        int input_line_index = 0;
+        char current_char = 0;
+
+        do {
+            fifo_read(&console_rx_fifo, &current_char, 1);
+
+            if (current_char != '\n') {
+                input_line[input_line_index++] = current_char;
+            }
+
+            if (input_line_index > 127) {
+                console_put_line("Console> Error: Failed to read line. Input is too long.");
+            }
+        } while (current_char != '\n');
+
+        console_rx_line_ready--;
+
+        if (input_line == "esp stop_stream") {
+            esp_module_stop_stream();
+        } else if (input_line == "esp start_stream") {
+            esp_module_start_stream();
+        } else if (input_line == "esp wifi_connect") {
+            esp_module_wifi_connect(WIFI_SSID, WIFI_PASSWORD);
+        } else if (input_line == "restart") {
+            console_put_line(CONSOLE_VT100_COLOR_TEXT_CYAN
+                "Resetting..."
+                CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+            delay_ms(50);
+
+            __DSB;
+            SCB->AIRCR = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
+            RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
+            NVIC_SystemReset();
+        }
+
+        free(input_line);
+    }
 }
 
 
@@ -48,7 +88,7 @@ void console_put_char(uint8_t value) {
     UART->UART_THR = UART_THR_TXCHR(value);
 }
 
-void console_put_string(const char* str) {
+void console_put_raw_string(const char* str) {
     const char* c = str;
 
     while (*c != 0) {
@@ -57,6 +97,16 @@ void console_put_string(const char* str) {
     }
 }
 
+void console_put_line(const char* str) {
+    // console_put_raw_string(CONSOLE_VT100_CURSOR_UP);
+    // console_put_char(CONSOLE_ASCII_CARRIAGE_RETURN);
+    console_put_raw_string(str);
+    console_put_char('\n');
+}
+
+void console_put(const char* str) {
+    console_put_raw_string(str);
+}
 
 void console_put_formatted(const char* format, ...) {
     va_list args;
@@ -64,11 +114,11 @@ void console_put_formatted(const char* format, ...) {
 
     size_t required_size = vsnprintf(NULL, 0, format, args) + 1;
 
-    char* buffer = malloc(required_size + 1);
+    char* buffer = calloc(required_size + 1, sizeof(char));
 
     vsnprintf(buffer, required_size, format, args);
 
-    console_put_string(buffer);
+    console_put_line(buffer);
 
     free(buffer);
 }
@@ -101,7 +151,14 @@ uint8_t console_peek_char() {
 void UART_Handler() {
     // Handle RX situations by putting received bytes into fifo.
     if (UART->UART_IMR & UART_IMR_RXRDY) {
-        fifo_write_single(&console_rx_fifo, UART->UART_RHR);
+        uint8_t value = UART->UART_RHR;
+
+        // TODO:
+        //console_put_char(value); // Console echo
+        fifo_write_single(&console_rx_fifo, value);
+        if (value == '\n') {
+            console_rx_line_ready++;
+        }
     }
 }
 

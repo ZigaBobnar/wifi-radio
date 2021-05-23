@@ -57,6 +57,10 @@
 #define CONSOLE_VT100_CURSOR_RIGHT_n(n)             "\033[" #n "C"
 #define CONSOLE_VT100_CURSOR_LEFT_n(n)              "\033[" #n "D"
 
+#define CONSOLE_VT100_CURSOR_GET_POS                "\033[6n"   /* response: '\033[<v>;<h>R' */
+#define CONSOLE_VT100_CURSOR_SAVE_POS               "\033[7"
+#define CONSOLE_VT100_CURSOR_RESTORE_POS            "\033[8"
+
 // Erasing
 // Erasing is inclusive to the character it represents
 // EOL=End of line, BOL=Beginning of line
@@ -96,8 +100,10 @@
 // DW=Double width, SW=Single width
 // DH=Double height, SH=Single height
 
-#define CONSOLE_VT100_TEXT_DWDH                     "\033[#5"
-#define CONSOLE_VT100_TEXT_SWSH                     "\033[#6"
+#define CONSOLE_VT100_TEXT_DH_LINE_TOP              "\033[#3"
+#define CONSOLE_VT100_TEXT_DH_LINE_BOTTOM           "\033[#4"
+#define CONSOLE_VT100_TEXT_SW_LINE                  "\033[#5"
+#define CONSOLE_VT100_TEXT_DW_LINE                  "\033[#6"
 
 
 #endif  // CONSOLE_DEFINITIONS_H_

@@ -1,5 +1,6 @@
 #include "esp_module.h"
 #include <string.h>
+#include <stdarg.h>
 #include "console.h"
 #include "timeguard.h"
 
@@ -16,6 +17,8 @@ fifo_t esp_rx_fifo = {
     .buffer      = esp_rx_fifo_buff,
 };
 
+bool stream_running = false;
+
 void esp_module_hardware_setup(lcd_t* lcd_ptr) {
     default_lcd = lcd_ptr;
 
@@ -24,7 +27,7 @@ void esp_module_hardware_setup(lcd_t* lcd_ptr) {
 
     sysclk_enable_peripheral_clock(ID_USART0);
     sam_usart_opt_t usart_opts = {
-        .baudrate = 74880/*115200*/,
+        .baudrate = /*74880*/115200,
         .char_length = US_MR_CHRL_8_BIT,
         .parity_type = US_MR_PAR_NO,
         .stop_bits = US_MR_NBSTOP_1_BIT,
@@ -42,18 +45,23 @@ bool esp_module_init() {
     int8_t retries_left = 10;
 
     while (retries_left >= 0) {
-        esp_module_clear_status();
-        esp_module_tx_put_char('s');
-        char buff[64];
-        sprintf(buff, "TX-ESP> Sending 's' command (retries left: %i)\n", retries_left);
-        console_put_string(buff);
+        console_put_formatted("ESP> Sending module init command, tries left: %i", retries_left);
 
-        if (esp_module_rx_read_wait()) {
-            if (esp_rx_data == 'O' && esp_module_rx_read_wait()) {
-                if (esp_rx_data == 'K') {
-                    return true;
-                }
+        esp_module_clear_status();
+
+        esp_module_tx_put_line("status");
+
+        char* response = esp_module_rx_read_line(31, 100);
+        if (response != NULL) {
+            if (strcmp(response, "OK") == 0) {
+                console_put_line("ESP> Module initialized.");
+                free(response);
+
+                return true;
             }
+            
+            console_put_line("ESP> Module init failed. Incorrect response.");
+            free(response);
         }
 
         retries_left--;
@@ -64,115 +72,49 @@ bool esp_module_init() {
     return false;
 }
 
-uint8_t esp_module_wifi_connect(const char* ssid, const char* password) {
-    return 0;
-    /*int16_t esp_connect_retries = 10;
+bool esp_module_wifi_connect(const char* ssid, const char* password) {
+    console_put_line("ESP> Sending wifi connect command");
 
-    while (esp_connect_retries >= 0) {
-        uint8_t ssid_length = strlen(ssid);
-        uint8_t password_length = strlen(password);
+    esp_module_clear_status();
 
-        sprintf(default_lcd->_lcd_string, "                ");
-        sprintf(default_lcd->_lcd_string, "Conn WiFi %i", esp_connect_retries);
-        lcd_write_lcd_string(default_lcd);
-        delay_ms(100);
-        /*sprintf(default_lcd->_lcd_string + 16, "                ");
-        sprintf(default_lcd->_lcd_string + 16, "SSID length %i", ssid_length);
-        lcd_write_lcd_string(default_lcd);
-        delay_ms(1000);
-        sprintf(default_lcd->_lcd_string + 16, "                ");
-        sprintf(default_lcd->_lcd_string + 16, "Pass length %i", password_length);
-        lcd_write_lcd_string(default_lcd);
-        delay_ms(1000);
-        sprintf(default_lcd->_lcd_string + 16, "                ");
-        sprintf(default_lcd->_lcd_string + 16, "SSID:%s", ssid);
-        lcd_write_lcd_string(default_lcd);
-        delay_ms(1000);
-        sprintf(default_lcd->_lcd_string + 16, "                ");
-        sprintf(default_lcd->_lcd_string + 16, "Pass:%s", password);
-        lcd_write_lcd_string(default_lcd);
-        delay_ms(1000);*
+    esp_module_tx_put_formatted("connect %s %s", ssid, password);
+    delay_ms(100);
 
-        esp_module_clear_status();
-        //esp_module_write('c');
-            default_lcd->lcd_lower[0] = 'c';
-            lcd_write_lcd_string(default_lcd);
-            //delay_ms(100);
+    char* response = esp_module_rx_read_line(127, 15000);
+    if (response != NULL) {
+        if (strcmp(response, "OK") == 0) {
+            console_put_line("ESP> Module initialized.");
+            free(response);
 
-
-        esp_module_tx_put_char(ssid_length);
-            default_lcd->lcd_lower[1] = ssid_length;
-            lcd_write_lcd_string(default_lcd);
-            //delay_ms(100);
-        //esp_module_write(password_length);
-            default_lcd->lcd_lower[2] = password_length;
-            lcd_write_lcd_string(default_lcd);
-            //delay_ms(100);
-
-        for (uint8_t i = 0; i < ssid_length; i++) {
-            esp_module_tx_put_char(ssid[i]);
+            return true;
         }
-        esp_module_tx_put_char(0);
+        
+        console_put_line("ESP> Module init failed. Incorrect response.");
+        free(response);
 
-        for (uint8_t i = 0; i < password_length; i++) {
-            esp_module_tx_put_char(password[i]);
-        }
-        esp_module_tx_put_char(0);
-
-
-        int i = 0;
-        do {
-            if (esp_module_rx_read_wait_timeout(1000)) {
-                default_lcd->lcd_lower[i] = esp_rx_data;
-                lcd_write_lcd_string(default_lcd);
-                i++;
-            }
-
-
-            if (i >= 15) {
-                delay_ms(1000);
-                i = 0;
-            }
-        } while (1);
-
-
-        //delay_ms(50);
-
-        /*if (esp_module_read_wait_timeout(10000)) {
-            sprintf(default_lcd->_lcd_string, "                ");
-            sprintf(default_lcd->_lcd_string, "WiFi state:");
-            sprintf(default_lcd->_lcd_string + 16, "                ");
-            sprintf(default_lcd->_lcd_string + 16, "%i", esp_rx_data);
-            lcd_write_lcd_string(default_lcd);
-            delay_ms(100);
-
-            return esp_rx_data;
-            /*if (esp_rx_data == 0x01) {
-                // Success
-                return 0x01;
-            } else {
-                return 0x02;
-            }*
-        } else {
-            sprintf(default_lcd->_lcd_string + 16, "                ");
-            sprintf(default_lcd->_lcd_string + 16, "No recv...");
-            lcd_write_lcd_string(default_lcd);
-            delay_ms(500);
-            //return 0x00;
-        }*
-
-        esp_connect_retries--;
-    }*/
+        return false;
+    }
 }
 
 void esp_module_start_stream() {
+    console_put_line("ESP> Sending start stream command");
+
     esp_module_clear_status();
-    esp_module_tx_put_char('S');
+    esp_module_tx_put_line("start_stream");
+    stream_running = true;
+
+    delay_ms(100);
+    esp_module_clear_status();
 }
 
 void esp_module_stop_stream() {
+    console_put_line("ESP> Sending stop stream command");
+
     esp_module_clear_status();
-    esp_module_tx_put_char('E');
+    esp_module_tx_put_line("stop_stream");
+    stream_running = false;
+
+    delay_ms(100);
     esp_module_clear_status();
 }
 
@@ -180,6 +122,30 @@ void esp_module_tx_put_char(uint8_t value) {
 	while (!(USART0->US_CSR & US_CSR_TXRDY)) {}
 
 	USART0->US_THR = US_THR_TXCHR(value);
+}
+
+void esp_module_tx_put_line(const char* value) {
+    console_put_formatted("ESP(TX)> %s", value);
+
+    for (int i = 0; i < strlen(value); i++) {
+        esp_module_tx_put_char(value[i]);
+    }
+    esp_module_tx_put_char('\n');
+}
+
+void esp_module_tx_put_formatted(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    size_t required_size = vsnprintf(NULL, 0, format, args) + 1;
+
+    char* buffer = calloc(required_size + 1, sizeof(char));
+
+    vsnprintf(buffer, required_size, format, args);
+
+    esp_module_tx_put_line(buffer);
+
+    free(buffer);
 }
 
 bool esp_module_rx_read() {
@@ -195,12 +161,44 @@ bool esp_module_rx_read_wait_timeout(const int32_t timeout_ms) {
 
     while (!esp_module_rx_char_ready()) {
         if (timeguard_get_time_ms() - read_start_ms > timeout_ms) {
-            console_put_string("E: ESP module rx wait timed out after 1000 ms\n");
+            console_put_formatted("ESP> Error: ESP module rx wait timed out after %i ms", (int)timeout_ms);
             return false;
         }
     }
 
     return esp_module_rx_read();
+}
+
+char* esp_module_rx_read_line(size_t max_length, int32_t timeout_ms) {
+    char* response = calloc(max_length + 1, sizeof(char));
+    int response_index = 0;
+
+    do {
+        if (!esp_module_rx_read_wait_timeout(timeout_ms)) {
+            console_put_line("ESP> Error: Failed to read line. Did not receive a character in proper time interval.");
+
+            free(response);
+            return NULL;
+        }
+
+        if (esp_rx_data != '\n') {
+            response[response_index++] = esp_rx_data;
+        } else {
+            return response;
+        }
+
+        if (response_index > max_length) {
+            console_put_line("ESP> Error: Failed to read line. Response is too long.");
+            
+            free(response);
+            return NULL;
+        }
+    } while (1);
+
+    console_put_line("ESP> Error: Failed to read line. Unknown error.");
+
+    free(response);
+    return NULL;
 }
 
 bool esp_module_rx_char_ready() {
@@ -245,18 +243,18 @@ void USART0_Handler() {
         uint8_t recv = USART0->US_RHR;
         fifo_write_single(&esp_rx_fifo, recv);
 
-        *(line_buff + line_idx) = recv;
-        line_idx++;
-        if (recv == '\n' || line_idx >= 250) {
-
-            console_put_string("ESP> ");
-            console_put_string(line_buff);
+        if (!stream_running) {
             if (recv != '\n') {
-                console_put_char('\n');
+                *(line_buff + line_idx) = recv;
+                line_idx++;
             }
 
-            line_idx = 0;
-            memset(line_buff, 0, sizeof(line_buff));
+            if (recv == '\n' || line_idx >= 250) {
+                console_put_formatted("ESP(RX)> %s", line_buff);
+
+                line_idx = 0;
+                memset(line_buff, 0, sizeof(line_buff));
+            }
         }
     }
 }

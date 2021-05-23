@@ -54,9 +54,22 @@ int main (void)
         lcd_write_upper_formatted(&lcd, "Boot setup fail");
         lcd_write_lower_formatted(&lcd, "Cannot continue");
 
-        console_put_string(CONSOLE_VT100_COLOR_TEXT_RED
-            "\n\nBoot setup has failed...\nCannot continue.\n"
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+            "\n\nBoot setup has failed...\nCannot continue."
             CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+
+        #if WIFI_RADIO_AUTOREBOOT == 1
+            console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+                "Resetting in 10 seconds."
+                CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+
+            delay_ms(10000);
+
+            __DSB;
+            SCB->AIRCR = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
+            RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
+            NVIC_SystemReset();
+        #endif
 
         while (1) {}
     }
@@ -77,7 +90,6 @@ bool boot_setup() {
     lcd_clear_upper(&lcd);
     lcd_clear_lower(&lcd);
 
-    int32_t lcd_finish_time = timeguard_get_time_ms();
     lcd_write_upper_formatted(&lcd, "WiFi radio init");
     lcd_write_lower_formatted(&lcd, "LCD OK");
 
@@ -93,93 +105,93 @@ bool boot_setup() {
     console_enable();
 
     lcd_write_lower_formatted(&lcd, "Console OK");
-    console_put_string(CONSOLE_VT100_COLOR_BG_BLACK
+    console_put_line(CONSOLE_VT100_COLOR_BG_BLACK
         CONSOLE_VT100_COLOR_TEXT_CYAN
         WIFI_RADIO_CONSOLE_BANNER
         CONSOLE_VT100_COLOR_BG_DEFAULT
         CONSOLE_VT100_COLOR_TEXT_DEFAULT);
-    console_put_string("==> WiFi radio boot setup...\n");
-    console_put_formatted(" => [LCD]\n (OK, %i ms)\n", (int)(lcd_end_time - lcd_start_time));
-    console_put_string(" => [Console]\n");
+    console_put_line("==> WiFi radio boot setup...");
+    console_put_formatted(" => [LCD]\n (OK, %i ms)", (int)(lcd_end_time - lcd_start_time));
+    console_put_line(" => [Console]");
 
     delay_ms(200);
 
     int32_t console_end_time = timeguard_get_time_ms();
-    console_put_formatted(" (OK, %i ms)\n", (int)(console_end_time - console_start_time));
+    console_put_formatted(" (OK, %i ms)", (int)(console_end_time - console_start_time));
 
 
     /// Initialize DAC
     int32_t dac_start_time = timeguard_get_time_ms();
     lcd_write_lower_formatted(&lcd, "DAC...");
-    console_put_string(" => [DAC]\n");
+    console_put_line(" => [DAC]");
 
     dac_init(&dac);
     dac_write(&dac, 0);
-    
+
     lcd_write_lower_formatted(&lcd, "DAC OK");
 
     delay_ms(200);
 
     int32_t dac_end_time = timeguard_get_time_ms();
-    console_put_formatted(" (OK, %i ms)\n", (int)(dac_end_time - dac_start_time));
+    console_put_formatted(" (OK, %i ms)", (int)(dac_end_time - dac_start_time));
 
 
     /// Initialize ESP module
     int32_t esp_start_time = timeguard_get_time_ms();
     lcd_write_lower_formatted(&lcd, "ESP module...   ");
-    console_put_string(" => [ESP module]\n");
+    console_put_line(" => [ESP module]");
 
-    console_put_string("\tESP module hardware setup...\n");
+    console_put_line("\tESP module hardware setup...");
     esp_module_hardware_setup(&lcd);
-    
+
     delay_ms(100);
 
-    console_put_string("\tESP module hardware setup OK\n");
+    console_put_line("\tESP module hardware setup OK");
 
-    console_put_string("\tESP module init...\n");
+    console_put_line("\tESP module init...");
     if (!esp_module_init()) {
         lcd_write_upper_formatted(&lcd, "ESP module init");
         lcd_write_lower_formatted(&lcd, " FAIL");
-        
-        console_put_string(CONSOLE_VT100_COLOR_TEXT_RED
-            "\tESP module init FAIL\n" CONSOLE_VT100_COLOR_TEXT_DEFAULT);
-        console_put_string(CONSOLE_VT100_COLOR_TEXT_RED
-            "\nFailed to initialize ESP module. This could be hardware problem.\n"
+
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+            "\tESP module init FAIL" CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+            "\nFailed to initialize ESP module. This could be hardware problem."
             CONSOLE_VT100_COLOR_TEXT_DEFAULT);
-        
+
         return false;
     }
 
-    console_put_string("\tESP module init OK\n");
+    console_put_line("\tESP module init OK");
 
     ////  Connect to WiFi
     lcd_write_lower_formatted(&lcd, "WiFi connect...");
-    console_put_string("\tWiFi connect...\n");
+    console_put_line("\tWiFi connect...");
 
     if (!esp_module_wifi_connect(WIFI_SSID, WIFI_PASSWORD)) {
         lcd_write_upper_formatted(&lcd, "WiFi connect");
         lcd_write_lower_formatted(&lcd, " FAIL");
-        console_put_string(CONSOLE_VT100_COLOR_TEXT_RED "\tWiFi connect FAIL\n"
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED "\tWiFi connect FAIL"
             CONSOLE_VT100_COLOR_TEXT_DEFAULT);
-        console_put_string(CONSOLE_VT100_COLOR_TEXT_RED
-            "\nFailed to connect to WiFi.\n" CONSOLE_VT100_COLOR_TEXT_DEFAULT);
-        
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+            "\nFailed to connect to WiFi." CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+
         return false;
     }
 
-    console_put_string("\tWiFi connect OK\n");
-    console_put_string("\t  WiFi connected to " WIFI_SSID "\n"); // Should SSID be queried from module?
+    console_put_line("\tWiFi connect OK");
+    console_put_line("\t  WiFi connected to '" WIFI_SSID "'"); // Should SSID be queried from module?
 
-    console_put_string("\tStarting audio stream...\n");
+    console_put_line("\tStarting audio stream...");
     esp_module_start_stream();
-    console_put_string("\tStarting audio stream OK\n");
-    
+    console_put_line("\tStarting audio stream OK");
+
     lcd_write_lower_formatted(&lcd, "ESP module OK");
 
     delay_ms(200);
-    
+
     int32_t esp_end_time = timeguard_get_time_ms();
-    console_put_formatted(" (OK, %i ms)\n", (int)(esp_end_time - esp_start_time));
+    console_put_formatted(" (OK, %i ms)", (int)(esp_end_time - esp_start_time));
 
 
     lcd_write_upper_formatted(&lcd, "WiFi radio");
@@ -188,24 +200,25 @@ bool boot_setup() {
 
     int32_t boot_end_time = timeguard_get_time_ms();
     console_put_formatted(CONSOLE_VT100_COLOR_TEXT_GREEN
-        "Boot succeeded, took %i ms\n" CONSOLE_VT100_COLOR_TEXT_DEFAULT,
+        "Boot succeeded, took %i ms" CONSOLE_VT100_COLOR_TEXT_DEFAULT,
         (int)(boot_end_time - boot_start_time));
-    console_put_string("WiFi radio ready.\n\n");
+    console_put_line("WiFi radio ready.\n");
 
     return true;
 }
 
 void main_loop() {
-    /*if (esp_module_read()) {
-        lcd_clear_lower(&lcd);
-        sprintf(lcd.lcd_lower, "Recv: 0x%x", esp_rx_data);
-        lcd_write_lcd_string(&lcd);
+    console_process_input();
+    
+    if (stream_running) {
+        if (esp_module_rx_char_ready()) {
+            esp_module_rx_read();
+
+            if (dac_tx_ready(&dac)) {
+                dac_write(&dac, (esp_rx_data*10));
+            }
+        }
     }
-
-    static bool dac1 = false;
-
-    dac_write(&dac, dac1 * 500 + 200);
-    dac1 = !dac1;*/
 }
 
 __EXTERN_C_END

@@ -103,7 +103,8 @@ void lcd_write_formatted(lcd_t* lcd, const char* format, ...) {
     va_list args;
     va_start(args, format);
 
-    char buffer[33];
+    static char buffer[33];
+    memset(buffer, 0, sizeof(buffer));
 
     vsnprintf(buffer, 33, format, args);
     memcpy(lcd->_lcd_string, buffer, 32 * sizeof(uint8_t));
@@ -115,7 +116,8 @@ void lcd_write_upper_formatted(lcd_t* lcd, const char* format, ...) {
     va_list args;
     va_start(args, format);
 
-    char buffer[17];
+    static char buffer[17];
+    memset(buffer, 0, sizeof(buffer));
 
     vsnprintf(buffer, 17, format, args);
     memcpy(lcd->lcd_upper, buffer, 16 * sizeof(uint8_t));
@@ -127,7 +129,8 @@ void lcd_write_lower_formatted(lcd_t* lcd, const char* format, ...) {
     va_list args;
     va_start(args, format);
 
-    char buffer[17];
+    static char buffer[17];
+    memset(buffer, 0, sizeof(buffer));
 
     vsnprintf(buffer, 17, format, args);
     memcpy(lcd->lcd_lower, buffer, 16 * sizeof(uint8_t));

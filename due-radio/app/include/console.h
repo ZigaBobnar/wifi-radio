@@ -53,12 +53,24 @@ void console_process_input(void);
 void console_put_char(const uint8_t value);
 
 /**
- * Write (transmit) null-terminated string value to the TX line.
+ * Write (transmit) null-terminated string value directly to the TX line.
  */
-void console_put_string(const char* str);
+void console_put_raw_string(const char* str);
 
 /**
- * Write (transmit) formatted string using sprintf.
+ * Write (transmit) null-terminated string value to the TX line and add LF
+ * character to the end.
+ */
+void console_put_line(const char* str);
+
+/**
+ * Write (transmit) null-terminated string value to the TX line. This will not
+ * add LF character to the end.
+ */
+void console_put(const char* str);
+
+/**
+ * Write (transmit) formatted string using sprintf and print it as line.
  */
 void console_put_formatted(const char* format, ...)
     __attribute__((format (__printf__, 1, 0)));
