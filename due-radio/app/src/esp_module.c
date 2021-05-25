@@ -27,7 +27,7 @@ void esp_module_hardware_setup(lcd_t* lcd_ptr) {
 
     sysclk_enable_peripheral_clock(ID_USART0);
     sam_usart_opt_t usart_opts = {
-        .baudrate = /*74880*/115200,
+        .baudrate = /*74880*//*115200*/500000,
         .char_length = US_MR_CHRL_8_BIT,
         .parity_type = US_MR_PAR_NO,
         .stop_bits = US_MR_NBSTOP_1_BIT,

@@ -4,12 +4,12 @@
 #include <ESP8266HTTPClient.h>
 
 //#include "AudioFileSourceICYStream.h"
-#include "AudioFileSourceHTTPStream.h"
-#include "AudioFileSourceBuffer.h"
-#include "AudioGeneratorMP3.h"
-#include "AudioOutputSerialWAV.h"
+//#include "AudioFileSourceHTTPStream.h"
+//#include "AudioFileSourceBuffer.h"
+//#include "AudioGeneratorMP3.h"
+//#include "AudioOutputSerialWAV.h"
 
-#include "serial_wav_output.h"
+#include "network_wav_client.h"
 
 void run_wait_for_init(void);
 void run_wait_for_command(void);
@@ -21,50 +21,19 @@ void run_command_stop_stream(void);
 
 //const char* g_stream_url = "http://live.radio1.si/Radio1";
 //const char* g_stream_url = "http://jazz.streamr.ru/jazz-64.mp3";
-const char* g_stream_url = "http://192.168.0.2:8000/radio";
+const char* stream_url = "http://192.168.0.2:20343/stream";
 
-AudioGeneratorMP3 *g_mp3;
-//AudioFileSourceICYStream *g_file;
-AudioFileSourceHTTPStream *g_file;
-AudioFileSourceBuffer *g_buff;
-SerialWavOutput *g_out;
-bool g_is_radio_streaming = false;
+bool is_radio_streaming = false;
 
 String command_line;
-
-// Called when a metadata event occurs (i.e. an ID3 tag, an ICY block, etc.
-void MDCallback(void *cbData, const char *type, bool isUnicode, const char *string) {
-    //const char *ptr = reinterpret_cast<const char *>(cbData);
-    (void) isUnicode; // Punt this ball for now
-    // Note that the type and string may be in PROGMEM, so copy them to RAM for printf
-    char s1[32], s2[64];
-    strncpy_P(s1, type, sizeof(s1));
-    s1[sizeof(s1)-1]=0;
-    strncpy_P(s2, string, sizeof(s2));
-    s2[sizeof(s2)-1]=0;
-    //Serial.printf("METADATA(%s) '%s' = '%s'\n", ptr, s1, s2);
-    //Serial.flush();
-}
-
-// Called when there's a warning or error (like a buffer underflow or decode hiccup)
-void StatusCallback(void *cbData, int code, const char *string) {
-    //const char *ptr = reinterpret_cast<const char *>(cbData);
-    // Note that the string may be in PROGMEM, so copy it to RAM for printf
-    char s1[64];
-    strncpy_P(s1, string, sizeof(s1));
-    s1[sizeof(s1)-1]=0;
-    //Serial.printf("STATUS(%s) '%d' = '%s'\n", ptr, code, s1);
-    //Serial.flush();
-}
-
-
+NetworkWavClient* wav_client;
 
 void setup() {
   WiFi.disconnect();
   WiFi.softAPdisconnect();
   WiFi.mode(WIFI_STA);
 
-  Serial.begin(/*74880*/115200);
+  Serial.begin(/*74880*//*115200*/500000);
   delay(200);
 
   command_line = "";
@@ -75,7 +44,7 @@ void setup() {
 void loop() {
   run_wait_for_command();
 
-  if (g_is_radio_streaming) {
+  if (is_radio_streaming) {
       run_stream();
   }
 }
@@ -140,10 +109,12 @@ void run_command(String command) {
 }
 
 void run_stream(void) {
-  if (g_mp3->isRunning()) {
-    if (!g_mp3->loop()) {
-      g_mp3->stop();
-      Serial.print("Stopped\n");
+  if (wav_client != nullptr) {
+    uint8_t data[2048];
+    uint32_t data_read = wav_client->read(&data, sizeof(data));
+
+    for (uint32_t i = 0; i < data_read; ++i) {
+      Serial.write(data[i]);
     }
   }
 }
@@ -172,30 +143,18 @@ void run_command_connect(String ssid, String password) {
 }
 
 void run_command_start_stream() {
-  //audioLogger = &Serial;
-  g_file = new AudioFileSourceHTTPStream(g_stream_url);
-  //g_file = new AudioFileSourceICYStream(g_stream_url);
-  g_file->RegisterMetadataCB(MDCallback, (void*)"ICY");
-  g_buff = new AudioFileSourceBuffer(g_file, /*32784*//*2048*/8192);
-  g_buff->RegisterStatusCB(StatusCallback, (void*)"buffer");
-  g_out = new SerialWavOutput();
-  //g_out->SetChannels(1);
-  //g_out->SetRate(500);
-  //g_out->SetBitsPerSample(8);
-  g_mp3 = new AudioGeneratorMP3();
-  g_mp3->RegisterStatusCB(StatusCallback, (void*)"mp3");
-  g_mp3->begin(g_buff, g_out);
+  run_command_stop_stream();
+  
+  wav_client = new NetworkWavClient(stream_url);
 
-  g_is_radio_streaming = true;
+  is_radio_streaming = true;
 }
 
 void run_command_stop_stream(void) {
-  g_mp3->stop();
-  
-  delete g_mp3;
-  delete g_out;
-  delete g_buff;
-  delete g_file;
+  if (wav_client != nullptr) {
+    wav_client->disconnect();
+    delete wav_client;
+  }
 
-  g_is_radio_streaming = false;
+  is_radio_streaming = false;
 }
