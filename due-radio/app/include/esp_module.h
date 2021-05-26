@@ -28,12 +28,39 @@ extern fifo_t esp_rx_fifo;
 
 extern bool stream_running;
 
+typedef struct {
+    //char* track_path;
+    int32_t track_length_ms;
+    int32_t sampling_frequency;
+    int32_t total_chunks;
+} track_info;
+
+typedef struct {
+    track_info track;
+    int32_t current_chunk;
+} currently_playing_info;
+
+typedef struct {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minutes;
+    int seconds;
+} current_time;
+
 void esp_module_hardware_setup(lcd_t* lcd_ptr);
 bool esp_module_init(void);
 
 bool esp_module_wifi_connect(const char* ssid, const char* password);
-void esp_module_start_stream(void);
-void esp_module_stop_stream(void);
+void esp_module_play_next();
+void esp_module_play_previous();
+currently_playing_info* esp_module_get_currently_playing();
+track_info* esp_module_get_track_info(int track_id);
+void esp_module_get_chunk(int track_id, int chunk_index);
+current_time* esp_module_get_current_time();
+//void esp_module_start_stream(void);
+//void esp_module_stop_stream(void);
 
 void esp_module_tx_put_char(uint8_t value);
 void esp_module_tx_put_line(const char* value);

@@ -60,9 +60,9 @@ void console_process_input() {
         console_rx_line_ready--;
 
         if (input_line == "esp stop_stream") {
-            esp_module_stop_stream();
+            //esp_module_stop_stream();
         } else if (input_line == "esp start_stream") {
-            esp_module_start_stream();
+            //esp_module_start_stream();
         } else if (input_line == "esp wifi_connect") {
             esp_module_wifi_connect(WIFI_SSID, WIFI_PASSWORD);
         } else if (input_line == "restart") {

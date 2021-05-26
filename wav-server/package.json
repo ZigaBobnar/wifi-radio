@@ -4,14 +4,26 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --project ./",
+    "server": "node ./build/main.js",
+    "server:dev": "ts-node-dev --respawn main.ts",
+    "client:dev": "ts-node-dev --respawn testclient.ts",
+    "dev": "npm run build && npm run server",
     "start": "node server.js"
   },
-  "author": "",
+  "author": "Ziga Bobnar",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "ts-node": "^10.0.0",
+    "ts-node-dev": "^1.1.6",
+    "typescript": "^4.2.4",
     "wav": "^1.0.2",
     "wavefile": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.11",
+    "@types/node": "^15.6.1"
   }
 }

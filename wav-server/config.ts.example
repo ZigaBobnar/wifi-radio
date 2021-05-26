@@ -1,0 +1,9 @@
+const port = 20343;
+const defaultPlaylist = [
+  "./music/file1.wav",
+  "./music/file2.wav",
+  "./music/file3.wav",
+  "./music/file4.wav",
+];
+
+export { port, defaultPlaylist };

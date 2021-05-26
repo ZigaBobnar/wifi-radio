@@ -3,27 +3,25 @@
 #include <SD.h>
 #include <ESP8266HTTPClient.h>
 
-//#include "AudioFileSourceICYStream.h"
-//#include "AudioFileSourceHTTPStream.h"
-//#include "AudioFileSourceBuffer.h"
-//#include "AudioGeneratorMP3.h"
-//#include "AudioOutputSerialWAV.h"
-
 #include "network_wav_client.h"
 
 void run_wait_for_init(void);
 void run_wait_for_command(void);
 void run_command(String command);
-void run_stream(void);
 void run_command_connect(String ssid, String password);
-void run_command_start_stream(void);
-void run_command_stop_stream(void);
+void run_command_play_next();
+void run_command_play_previous();
+void run_command_get_currently_playing();
+void run_command_get_track_info(int track_id);
+void run_command_get_chunk(int track_id, int chunk_index);
+void run_command_get_current_time();
+// void run_stream(void);
+// void run_command_start_stream(void);
+// void run_command_stop_stream(void);
 
-//const char* g_stream_url = "http://live.radio1.si/Radio1";
-//const char* g_stream_url = "http://jazz.streamr.ru/jazz-64.mp3";
-const char* stream_url = "http://192.168.0.2:20343/stream";
+const String api_url = "http://192.168.0.2:20343";
 
-bool is_radio_streaming = false;
+// bool is_radio_streaming = false;
 
 String command_line;
 NetworkWavClient* wav_client;
@@ -44,9 +42,9 @@ void setup() {
 void loop() {
   run_wait_for_command();
 
-  if (is_radio_streaming) {
+  /*if (is_radio_streaming) {
       run_stream();
-  }
+  }*/
 }
 
 void run_wait_for_command() {
@@ -66,7 +64,6 @@ void run_wait_for_command() {
 void run_command(String command) {
   if (command == "status") {
     Serial.print("OK\n");
-
   } else if (command.startsWith("connect ")) {
     String ssid, password;
     bool reading_ssid = true;
@@ -99,10 +96,59 @@ void run_command(String command) {
     }
 
     run_command_connect(ssid, password);
-  } else if (command == "start_stream") {
-    run_command_start_stream();
-  } else if (command == "stop_stream") {
-    run_command_stop_stream();
+  } else if (command == "play_next") {
+    run_command_play_next();
+  } else if (command == "play_previous") {
+    run_command_play_previous();
+  } else if (command == "get_currently_playing") {
+    run_command_get_currently_playing();
+  } else if (command.startsWith("get_track_info ")) {
+    String track_id;
+    for (uint i = 15; i < command.length(); i++) {
+      track_id += command[i];
+    }
+
+    if (track_id.isEmpty()) {
+      Serial.print("FAIL\n");
+      return;
+    }
+
+    int track_id_int = atoi(track_id.c_str());
+
+    run_command_get_track_info(track_id_int);
+  } else if (command.startsWith("get_chunk ")) {
+    
+    String track_id, chunk_index;
+    bool reading_id = true;
+    
+    for (uint i = 8; i < command.length(); i++) {
+      if (command[i] != ' ') {
+        if (reading_id) {
+          track_id += command[i];
+        } else {
+          chunk_index += command[i];
+        }
+      } else {
+        if (reading_id) {
+          reading_id = false;
+        } else {
+          break;
+          // TODO: Too many arguments
+        }
+      }
+    }
+
+    if (track_id.isEmpty() || chunk_index.isEmpty()) {
+      Serial.print("FAIL\n");
+      return;
+    }
+
+    int track_id_int = atoi(track_id.c_str());
+    int chunk_index_int = atoi(chunk_index.c_str());
+
+    run_command_get_chunk(track_id_int, chunk_index_int);
+  } else if (command == "get_current_time") {
+    run_command_get_current_time();
   } else {
     // Unknown command
   }
@@ -142,7 +188,87 @@ void run_command_connect(String ssid, String password) {
   Serial.print("Connection timed out\n");
 }
 
-void run_command_start_stream() {
+void run_command_play_next() {
+  HTTPClient http;
+  http.begin(api_url + "/next");
+  http.GET();
+  http.end();
+}
+
+void run_command_play_previous() {
+  HTTPClient http;
+  http.begin(api_url + "/previous");
+  http.GET();
+  http.end();
+}
+
+void run_command_get_currently_playing() {
+  HTTPClient http;
+  http.begin(api_url + "/track/current");
+  int statusCode = http.GET();
+  if (statusCode == HTTP_CODE_OK) {
+    String body = http.getString();
+
+    Serial.printf("OK %s\n", body.c_str());
+  } else {
+    Serial.printf("FAIL\n");
+  }
+
+  http.end();
+}
+
+void run_command_get_track_info(int track_id) {
+  HTTPClient http;
+  String endpoint = String("/track/%id");
+  endpoint.replace("%id", String(track_id));
+  http.begin(api_url + endpoint);
+  int statusCode = http.GET();
+  if (statusCode == HTTP_CODE_OK) {
+    String body = http.getString();
+    
+    Serial.printf("OK %s\n", body.c_str());
+  } else {
+    Serial.printf("FAIL\n");
+  }
+
+  http.end();
+}
+
+void run_command_get_chunk(int track_id, int chunk_index) {
+  HTTPClient http;
+  String endpoint = String("/track/%id/chunk/%chunkIndex");
+  endpoint.replace("%id", String(track_id));
+  endpoint.replace("%chunkIndex", String(chunk_index));
+  http.begin(api_url + endpoint);
+  int statusCode = http.GET();
+  if (statusCode == HTTP_CODE_OK) {
+    String body = http.getString();
+    
+    Serial.printf("OK %i\n", body.length());
+    Serial.print(body);
+  } else {
+    Serial.printf("FAIL\n");
+  }
+
+  http.end();
+}
+
+void run_command_get_current_time() {
+  HTTPClient http;
+  http.begin(api_url + "/time/now");
+  int statusCode = http.GET();
+  if (statusCode == HTTP_CODE_OK) {
+    String body = http.getString();
+
+    Serial.printf("OK %s\n", body.c_str());
+  } else {
+    Serial.printf("FAIL\n");
+  }
+
+  http.end();
+}
+
+/*void run_command_start_stream() {
   run_command_stop_stream();
   
   wav_client = new NetworkWavClient(stream_url);
@@ -157,4 +283,4 @@ void run_command_stop_stream(void) {
   }
 
   is_radio_streaming = false;
-}
+}*/
