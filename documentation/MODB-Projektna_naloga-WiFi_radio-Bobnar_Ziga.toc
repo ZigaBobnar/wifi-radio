@@ -11,3 +11,13 @@
 \contentsline {chapter}{\numberline {2}Izdelava projekta}{9}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Krmiljenje LCD zaslona}{9}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}LCD HD44780}{9}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}\textit {lcd.h} referenca}{14}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Implementacija DAC (digitalno-analognega pretvornika)}{15}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Arduino Due DACC}{15}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}\textit {dac.h} referenca}{16}{subsection.2.2.2}%
+\contentsline {section}{\numberline {2.3}FIFO vrsta (First in, first out)}{16}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}\textit {fifo.h} referenca}{17}{subsection.2.3.1}%
+\contentsline {section}{\numberline {2.4}Konzola (komunikacija z računalnikom)}{18}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}\textit {console.h} referenca}{19}{subsection.2.4.1}%
+\contentsline {section}{\numberline {2.5}Enostaven časovnik (timeguard)}{20}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}\textit {timeguard.h} referenca}{20}{subsection.2.5.1}%
