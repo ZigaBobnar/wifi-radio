@@ -1,0 +1,13 @@
+\babel@toc {english}{}
+\babel@toc {slovene}{}
+\contentsline {chapter}{\numberline {1}Predstavitev projekta}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Zahteve projekta}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Osnovna struktura projekta}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Seznam uporabljenih elementov:}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Projekt due-radio (Arduino Due)}{3}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Logična zgradba projekta}{4}{subsection.1.4.1}%
+\contentsline {section}{\numberline {1.5}Projekt modem-esp8266 (ESP8266)}{5}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Projekt wav-server (HTTP strežnik)}{6}{section.1.6}%
+\contentsline {chapter}{\numberline {2}Izdelava projekta}{9}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Krmiljenje LCD zaslona}{9}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}LCD HD44780}{9}{subsection.2.1.1}%
