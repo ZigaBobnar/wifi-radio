@@ -36,6 +36,7 @@
 
 % Dodatni simboli
 \usepackage{textcomp}                               % dodatni simboli (kot npr. €)
+\usepackage{eurosym}
 \usepackage{gensymb}                                % dodatni simboli \de­gree, \cel­sius, \pert­hou­sand, \mi­cro, \ohm
 \newcommand{\uppi}{\textrm{\greektext p\latintext}} % velika grška črka P z \uppi, alternativa simbolu \Pi
 
@@ -95,6 +96,8 @@
 \univerza{Univerza v Ljubljani}
 \fakulteta{Fakulteta za elektrotehniko}
 \definecolor{unilj}{cmyk}{0.00, 0.94, 0.94, 0.06} % barva Univerze v Ljubljani
+
+\lstset{language=C,numberstyle=\tiny,tabsize=4}
 
 %%
 %% Vsebina
@@ -162,6 +165,7 @@ Ker je s časom postalo dodajanje daljših kosov kode v datoteke, ki sicer nimaj
 Tako je možno sedaj razdeliti projekt na naslednje module (vse, kar je potrebno za uporabo kode enega modula v drugem modulu naj bi bila vključitev datoteke \textit{.h} modula in klic ustrezne funkcije):
 \begin{itemize}
 \item \textit{esp\_module.h}: Wi-Fi komunikacija, že glede na naslov projektne naloge verjetno najbolj ključen del celotnega projekta. Ta omogoča komunikacijo z modulom ESP-01, z uporabo strukturiranih ukazov in odzivov, preko serijskega vmesnika. Glavni problem te komunikacije je bila zagotovo visoka odzivnost, saj je za občutek realnočasnosti predvajanja posnetka potrebno zvočne vzorce v ustreznih intervalih nastavljati na izhod.
+\item \textit{audio\_player.h}: Predvajalnik glasbe, skrbi za prenos naslednjega segmenta posnetka, posredovanje trenutne vrednosti signala gonilniku digitalno-analognega pretvornika ter hranjenje informacij o predvajanem posnetku.
 \item \textit{lcd.h}: LCD gonilnik za 16x2 zaslone, kompatibilne z HD44780 protokolom. Ta vsebuje funkcije za inicializacijo zaslona, čiščenje, nastavljanje besedila, poleg tega pa funkcije, ki so po funkcionalnosti zelo podobne funkciji \textit{printf} in omogoča zelo enostavno formatiranje besedila (vstavljanje vrednosti dinamičnih argumentov v predpripravljeni obliki).
 \item \textit{dac.h}: DAC gonilnik, omogoča inicializacijo ter nastavljanje izhodnih vrednosti na izbrani kanal digitalno-analognega pretvornika.
 \item \textit{fifo.h}: FIFO vrsta, omogoča ciklično branje do zadnjega zapisanega elementa ter pisanje do zadnjega prebranega elementa. Poleg tega pa omogoča tudi "kukanje" (ang. peek), kar poenostavi preverjanje naslednjega podatka brez odstranjevanja.
@@ -288,7 +292,6 @@ Priključitev priključkov zaslona je možna na veliko različnih načinov. V mo
 
 Ker pa sem želel ohraniti nekaj fleksibilnosti glede priključitve LCD zaslona, sem ustvaril strukturo za nastavitev priključkov, poleg priključkov pa vsebuje še pomnilnik za izpis znakov ter kazalce na začetek prve ter začetek druge vrstice (to pride velikokrat prav, kadar je potrebno prvo vrstico pustiti pri miru). Enostavna koda te strukture izgleda tako:
 
-\lstset{language=C,numberstyle=\tiny}
 \begin{lstlisting}
 struct _lcd {
     uint32_t rs;
@@ -300,10 +303,10 @@ struct _lcd {
     uint32_t d6;
     uint32_t d7;
 
-    char __lcd_buffer[33];
-    char* _lcd_string;
-    char* lcd_upper;
-    char* lcd_lower;
+    char __lcd_buffer[33]; // Pomnilnik za znake na zaslonu
+    char* _lcd_string;     // Kazalec na zacetek pomnilnika
+    char* lcd_upper;       // Kazalec na zacetek prve vrstice
+    char* lcd_lower;       // Kazalec na zacetek druge vrstice
 };
 typedef struct _lcd lcd_t;
 \end{lstlisting}
@@ -346,37 +349,28 @@ void lcd_driver_raw_send(lcd_t* lcd, uint8_t value, bool is_command) {
 \subsection{\textit{lcd.h} referenca}
 
 Visokonivojske funkcije:
-
-\lstinline{void lcd_init(lcd_t* lcd)}\newline
-Inicializira LCD gonilnik z uporabo podane strukture.
-
-\lstinline{void lcd_write_lcd_string(lcd_t* lcd)}\newline
-Pošlje vrednosti iz \lstinline{lcd->__lcd_buffer} v LCD.
-
-\lstinline{void lcd_write_string(lcd_t* lcd, uint8_t* value)}\newline
-Pošlje vrednosti iz \lstinline{value} v LCD.
-
-\lstinline{void lcd_write_formatted(lcd_t* lcd, const char* format, ...)}\newline
-Izpiše formatiran tekst na začetek zaslona in z možnostjo preliva v naslednjo vrstico.
-
-\lstinline{void lcd_write_upper_formatted(lcd_t* lcd, const char* format, ...)}\newline
-Izpiše formatiran tekst samo v zgornjo vrstico.
-
-\lstinline{void lcd_write_lower_formatted(lcd_t* lcd, const char* format, ...)}\newline
-Izpiše formatiran tekst samo v spodnjo vrstico.
-
-\lstinline{void lcd_write_string_at_cursor(lcd_t* lcd, uint8_t* value, uint8_t length)}\newline
-Izpiše tekst od trenutne pozicije kurzorja naprej.
-
-\lstinline{void lcd_wait_busy_status(lcd_t* lcd)}\newline
-Počaka, da LCD signalizira konec operacij.
-
-\lstinline{void lcd_clear_upper(lcd_t* lcd)}\newline
-Izprazni vsebino zgornje vrstice v \lstinline{lcd->__lcd_buffer}.
-
-\lstinline{void lcd_clear_lower(lcd_t* lcd)}\newline
-Izprazni vsebino spodnje vrstice v \lstinline{lcd->__lcd_buffer}.
-
+\begin{itemize}
+	\item[] \lstinline{void lcd_init(lcd_t* lcd)}\newline
+		Inicializira LCD gonilnik z uporabo podane strukture.
+	\item[] \lstinline{void lcd_write_lcd_string(lcd_t* lcd)}\newline
+		Pošlje vrednosti iz \lstinline{lcd->__lcd_buffer} v LCD.
+	\item[] \lstinline{void lcd_write_string(lcd_t* lcd, uint8_t* value)}\newline
+		Pošlje vrednosti iz \lstinline{value} v LCD.
+	\item[] \lstinline{void lcd_write_formatted(lcd_t* lcd, const char* format, ...)}\newline
+		Izpiše formatiran tekst na začetek zaslona in z možnostjo preliva v naslednjo vrstico.
+	\item[] \lstinline{void lcd_write_upper_formatted(lcd_t* lcd, const char* format, ...)}\newline
+		Izpiše formatiran tekst samo v zgornjo vrstico.
+	\item[] \lstinline{void lcd_write_lower_formatted(lcd_t* lcd, const char* format, ...)}\newline
+		Izpiše formatiran tekst samo v spodnjo vrstico.
+	\item[] \lstinline{void lcd_write_string_at_cursor(lcd_t* lcd, uint8_t* value, uint8_t length)}\newline
+		Izpiše tekst od trenutne pozicije kurzorja naprej.
+	\item[] \lstinline{void lcd_wait_busy_status(lcd_t* lcd)}\newline
+		Počaka, da LCD signalizira konec operacij.
+	\item[] \lstinline{void lcd_clear_upper(lcd_t* lcd)}\newline
+		Izprazni vsebino zgornje vrstice v \lstinline{lcd->__lcd_buffer}.
+	\item[] \lstinline{void lcd_clear_lower(lcd_t* lcd)}\newline
+		Izprazni vsebino spodnje vrstice v \lstinline{lcd->__lcd_buffer}.
+\end{itemize}
 
 
 \section{Implementacija DAC (digitalno-analognega pretvornika)}
@@ -389,10 +383,10 @@ Arduino Due (oziroma SAM3X8E) ima že vgrajen in z zunanje strani dostopna dva k
 Podobno kot že za LCD gonilnik, sem za lažje konfiguriranje pripravil strukturo, ki vsebuje indeks kanala, določene nastavitve za območje vrednosti ter frekvenco vzorčenja za prožilnike (trenutno ni v implementirano):
 \begin{lstlisting}
 struct _dac {
-    uint32_t channel;
-    uint32_t max_value;
-    uint32_t min_value;
-    uint32_t sampling_frequency;
+    uint32_t channel;            // Kanal DAC kontrolerja
+    uint32_t max_value;          // Najvisja vrednost izhoda
+    uint32_t min_value;          // Najnizja vrednost izhoda
+    uint32_t sampling_frequency; // Frekvenca vzorcenja
 };
 typedef struct _dac dac_t;
 \end{lstlisting}
@@ -402,27 +396,26 @@ Kar se implementacije tiče je trenutno ta datoteka samo abstrakcija dejanske st
 
 \subsection{\textit{dac.h} referenca}
 
-\lstinline{void dac_init(dac_t* dac)}\newline
-Inicializira DACC vmesnik.
-
-\lstinline{bool dac_tx_ready(dac_t* dac)}\newline
-Preveri, če je DACC pripravljen na naslednji podatek.
-
-\lstinline{void dac_write(dac_t* dac, uint32_t value)}\newline
-Nastavi vrednost v DACC medpomnilnik.
-
+\begin{itemize}
+	\item[] \lstinline{void dac_init(dac_t* dac)}\newline
+		Inicializira DACC vmesnik.
+	\item[] \lstinline{bool dac_tx_ready(dac_t* dac)}\newline
+		Preveri, če je DACC pripravljen na naslednji podatek.
+	\item[] \lstinline{void dac_write(dac_t* dac, uint32_t value)}\newline
+		Nastavi vrednost v DACC medpomnilnik.
+\end{itemize}
 
 
 \section{FIFO vrsta (First in, first out)}
 FIFO vrsta omogoča učinkovit način za hitro shranjevanje podatkov, ki bodo kasneje prebrani, v medpomnilnik. Pri tem ne prihaja do nobenih prilagajanj velikosti (ang. resizing), saj se podatki, ki so bili že prebrani lahko prepišejo. Osnovna struktura je torej sestavljena iz nekega kosa pomnilnika, namenjenega podatkom, podatka o velikosti tega kosa pomnilnika, ter dveh indeksov. Prvi predstavlja trenutno pozicijo branja, drugi pa pisanja.
 
-Tako izgleda struktura:
+Tako izgleda struktura FIFO vrste:
 \begin{lstlisting}
 struct _fifo {
-    uint32_t read_idx;
-    uint32_t write_idx;
-    uint32_t size;
-    uint8_t* buffer;
+    uint32_t read_idx;  // Trenutna pozicija za pisanje
+    uint32_t write_idx; // Trenutna pozicija za branje
+    uint32_t size;      // Stevilo elementov, ki jih vrsta hrani
+    uint8_t* buffer;    // Pomnilnik velikosti size
 };
 typedef struct _fifo fifo_t;
 \end{lstlisting}
@@ -435,24 +428,20 @@ Kar sem opazil tekom razvoja je to, da je v osnovi čista FIFO vrsta lahko kar n
 
 \subsection{\textit{fifo.h} referenca}
 
-\lstinline{uint32_t fifo_read(fifo_t* fifo, uint8_t* data_buffer, uint32_t n)}\newline
-Prebere \lstinline{n} vrednosti iz FIFO vrste v \lstinline{data_buffer}.
-
-\lstinline{uint32_t fifo_peek(fifo_t* fifo, uint8_t* data_buffer, uint32_t n)}\newline
-Prebere \lstinline{n} vrednosti iz FIFO vrste v \lstinline{data_buffer}, vendar brez premikanja bralnega indeksa naprej.
-
-\lstinline{bool fifo_has_next_item(fifo_t* fifo)}\newline
-Preveri in vrne, če ima FIFO vrsta na voljo vsaj en element.
-
-\lstinline{uint32_t fifo_write(fifo_t* fifo, uint8_t* data_ptr, uint32_t n)}\newline
-Zapiše \lstinline{n} vrednosti iz \lstinline{data_ptr} v FIFO vrsto.
-
-\lstinline{uint32_t fifo_write_single(fifo_t* fifo, uint8_t value);}\newline
-Zapiše vrednost \lstinline{value} v FIFO vrsto.
-
-\lstinline{void fifo_discard(fifo_t* fifo)}\newline
-Postavi indeksa branja in pisanja na 0.
-
+\begin{itemize}
+	\item[] \lstinline{uint32_t fifo_read(fifo_t* fifo, uint8_t* data_buffer, uint32_t n)}\newline
+		Prebere \lstinline{n} vrednosti iz FIFO vrste v \lstinline{data_buffer}.
+	\item[] \lstinline{uint32_t fifo_peek(fifo_t* fifo, uint8_t* data_buffer, uint32_t n)}\newline
+		Prebere \lstinline{n} vrednosti iz FIFO vrste v \lstinline{data_buffer}, vendar brez premikanja bralnega indeksa naprej.
+	\item[] \lstinline{bool fifo_has_next_item(fifo_t* fifo)}\newline
+		Preveri in vrne, če ima FIFO vrsta na voljo vsaj en element.
+	\item[] \lstinline{uint32_t fifo_write(fifo_t* fifo, uint8_t* data_ptr, uint32_t n)}\newline
+		Zapiše \lstinline{n} vrednosti iz \lstinline{data_ptr} v FIFO vrsto.
+	\item[] \lstinline{uint32_t fifo_write_single(fifo_t* fifo, uint8_t value);}\newline
+		Zapiše vrednost \lstinline{value} v FIFO vrsto.
+	\item[] \lstinline{void fifo_discard(fifo_t* fifo)}\newline
+		Postavi indeksa branja in pisanja na 0.
+\end{itemize}
 
 
 \section{Konzola (komunikacija z računalnikom)}
@@ -466,43 +455,32 @@ Zaenkrat je komunikacija s konzolo samo enosmerna, z dovolj truda bi pa verjetno
 
 \subsection{\textit{console.h} referenca}
 
-\lstinline{void console_init(void)}\newline
-Inicializira konzolo z ustrezno baud hitrostjo in omogoči ustrezne izhodne priključke.
-
-\lstinline{void console_enable(void)}\newline
-Omogoči sprejemanje in oddajanje podatkov preko serijskega vmesnika.
-
-\lstinline{void console_process_input(void)}\newline
-NI implementirano! V prihodnje je tu lahko procesiranje vhodnih ukazov, ki pridejo po vmesniku iz računalnika.
-
-\lstinline{void console_put_char(const uint8_t value)}\newline
-Zapiše en znak v konzolo.
-
-\lstinline{void console_put_raw_string(const char* str)}\newline
-Zapiše niz znakov v konzolo.
-
-\lstinline{void console_put_line(const char* str)}\newline
-Zapiše niz znakov v konzolo in doda znak za novo vrstico na konec.
-
-\lstinline{void console_put(const char* str)}\newline
-Zapiše niz znakov v konzolo (ekvivalentno \lstinline{console_put_raw_string}).
-
-\lstinline{void console_put_formatted(const char* format, ...)}\newline
-Zapiše formatiran niz znakov v konzolo in doda novo vrstico na konec.
-
-\lstinline{bool console_char_ready(void)}\newline
-Preveri in vrne, če je v konzoli na voljo kakšen znak za sprejem.
-
-\lstinline{void console_wait_until_char_ready(void)}\newline
-Počaka, da je na voljo znak za sprejem.
-
-\lstinline{uint8_t console_get_char(void)}\newline
-Prebere znak iz medpomnilnika za sprejem.
-
-\lstinline{uint8_t console_peek_char(void)}\newline
-Prebere znak iz medpomnilnika za sprejem brez spreminjanja trenutne pozicije branja.
-
-
+\begin{itemize}
+	\item[] \lstinline{void console_init(void)}\newline
+		Inicializira konzolo z ustrezno baud hitrostjo in omogoči ustrezne izhodne priključke.
+	\item[] \lstinline{void console_enable(void)}\newline
+		Omogoči sprejemanje in oddajanje podatkov preko serijskega vmesnika.
+	\item[] \lstinline{void console_process_input(void)}\newline
+		\underline{NI implementirano!} V prihodnje je tu lahko procesiranje vhodnih ukazov, ki pridejo po vmesniku iz računalnika.
+	\item[] \lstinline{void console_put_char(const uint8_t value)}\newline
+		Zapiše en znak v konzolo.
+	\item[] \lstinline{void console_put_raw_string(const char* str)}\newline
+		Zapiše niz znakov v konzolo.
+	\item[] \lstinline{void console_put_line(const char* str)}\newline
+		Zapiše niz znakov v konzolo in doda znak za novo vrstico na konec.
+	\item[] \lstinline{void console_put(const char* str)}\newline
+		Zapiše niz znakov v konzolo (ekvivalentno \lstinline{console_put_raw_string}).
+	\item[] \lstinline{void console_put_formatted(const char* format, ...)}\newline
+		Zapiše formatiran niz znakov v konzolo in doda novo vrstico na konec.
+	\item[] \lstinline{bool console_char_ready(void)}\newline
+		Preveri in vrne, če je v konzoli na voljo kakšen znak za sprejem.
+	\item[] \lstinline{void console_wait_until_char_ready(void)}\newline
+		Počaka, da je na voljo znak za sprejem.
+	\item[] \lstinline{uint8_t console_get_char(void)}\newline
+		Prebere znak iz medpomnilnika za sprejem.
+	\item[] \lstinline{uint8_t console_peek_char(void)}\newline
+		Prebere znak iz medpomnilnika za sprejem brez spreminjanja trenutne pozicije branja.
+\end{itemize}
 
 \section{Enostaven časovnik (timeguard)}
 
@@ -513,26 +491,298 @@ Implementacija timeguard za delovanje uporablja interni časovni števec, omogo�
 
 \subsection{\textit{timeguard.h} referenca}
 
-\lstinline{void timeguard_init(void)}\newline
-Inicializira ustrezne periferne enote za uporabo časovnega števca.
-
-\lstinline{int32_t timeguard_get_time(void)}\newline
-Prebere vrednost iz časovnega števca. Ta vrednost še ni skalirana.
-
-\lstinline{int32_t timeguard_get_time_ms(void)}\newline
-Prebere vrednost trenutnega časa v milisekundah.
-
-\lstinline{int32_t timeguard_get_diff_ms(int32_t previous_time_ms)}\newline
-Izračuna razliko med trenutnim in podanim časom v milisekundah.
-
-\lstinline{int32_t timeguard_get_time_s(void)}\newline
-Prebere vrednost trenutnega časa v sekundah.
-
-\lstinline{int32_t timeguard_get_diff_s(int32_t previous_time_s)}\newline
-Izračuna razliko med trenutnim in podanim časom v sekundah.
+\begin{itemize}
+	\item[] \lstinline{void timeguard_init(void)}\newline
+		Inicializira ustrezne periferne enote za uporabo časovnega števca.
+	\item[] \lstinline{int32_t timeguard_get_time(void)}\newline
+		Prebere vrednost iz časovnega števca. Ta vrednost še ni skalirana.
+	\item[] \lstinline{int32_t timeguard_get_time_ms(void)}\newline
+		Prebere vrednost trenutnega časa v milisekundah.
+	\item[] \lstinline{int32_t timeguard_get_diff_ms(int32_t previous_time_ms)}\newline
+		Izračuna razliko med trenutnim in podanim časom v milisekundah.
+	\item[] \lstinline{int32_t timeguard_get_time_s(void)}\newline
+		Prebere vrednost trenutnega časa v sekundah.
+	\item[] \lstinline{int32_t timeguard_get_diff_s(int32_t previous_time_s)}\newline
+		Izračuna razliko med trenutnim in podanim časom v sekundah.
+\end{itemize}
 
 
 
+\section{Gonilnik za tipke}
+
+Človeška interakcija z napravami je še najbolj enostavna za uporabo in implementacijo, če uporabimo tipke. Te večinoma omogočajo odlično taktilno povratno informacijo ob pritisku in sprostitvi (občuten klik ter zvok). V primerjavi z na primer zasloni na dotik, kjer je ta povratna informacija običajno vizualna, je tipke tudi veliko bolj enostavno uporabiti v električnem vezju, saj lahko samo preverjamo, kdaj je njihovo notranje stikalo sklenjeno in kdaj ne.
+
+Naloga gonilnika za tipke je torej, da ustrezno reagira na spremembe stanja tipk. V vgrajenih napravah pri neposredni povezavi tipk na priključke mikrokrmilnika, lahko to delamo na vsaj dva različna načina. Prvi v ustreznih časovnih intervalih prebere stanja tipk, drugi pa lahko izkoristi v mikrokrmilnik vgrajeno možnost uporabe prekinitev (ang. interrupt). Slednji način omogoča, da program ves čas, kadar se s tipkami nič ne dogaja izvaja druge operacije, ko pa zazna spremembo stanja, pa skoči v funkcijo za procesiranje tega dogodka.
+
+V mojem primeru sem uporabil kar prvi način, saj za implementacijo potrebuje samo kodo za branje ter procesiranje stanja, ki jo lahko periodično kličem ob vsaki ponovitvi glavne zanke. S tem sicer lahko zamudimo nekatere zelo kratke pritiske, če bi bilo izvajanje glavne zanke časovno predolgo. Ima pa takšen način to prednost, da je predvidljiv in se ne vsiljuje v preostale procese, kot na primer nastavljanje izhodnih vrednosti na DAC, kar se mora zgoditi v dokaj natančnih časovnih intervalih, sicer bi lahko prišlo do popačenj.
+
+Funkcijo, ki prebira tipke in ugotavlja, katere so bile ravnokar pritisnjene in katere ravnokar spuščene, bi lahko struktuiral tako:
+
+\begin{lstlisting}
+void buttons_check()
+{
+	// Staticna spremenljivka hrani prejsnje stanje. Za razliko od globalnih spremenljivk, je ta omejena samo znotraj funkcije in ne "onesnazuje" globalnega dela programa.
+	static uint32_t old_state = 0;
+	
+	// Posamezni biti v spremenljivki predstavljajo tocno doloceno tipko.
+	uint32_t state =
+		(!ioport_get_pin_level(PIO_PC26_IDX) << 3) |
+		(!ioport_get_pin_level(PIO_PC25_IDX) << 2) |
+		(!ioport_get_pin_level(PIO_PC24_IDX) << 1) |
+		(!ioport_get_pin_level(PIO_PC23_IDX) << 0);
+	
+	// Izracun spremembe stanj
+	uint32_t rising_edge = ~old_state & state;
+	uint32_t falling_edge = old_state & ~state;
+	
+	// Koda, ki ustrezno odreagira na spremembe
+	...
+	//
+	
+	// Za konec moramo pripraviti funkcijo za naslednje izvajanje.
+	old_state = state;
+}
+\end{lstlisting}
+
+
+\subsection{\textit{buttons.h} referenca}
+
+\begin{itemize}
+	\item[] \lstinline{void buttons_init(void)}\newline
+		Inicializira ustrezne priključke za tipke.
+	\item[] \lstinline{void buttons_process(void)}\newline
+		Preveri novo stanje tipk in ustrezno reagira na morebitne pritiske.
+\end{itemize}
+
+
+
+\section{Wi-Fi komunikacija}
+
+S kodo iz prejšnjih razdelkov, sem prišel do neke podlage platforme, na kateri pa sedaj lahko končno začnem graditi še tisti bistveni del projekta, to je komunikacija z brezžičnim omrežjem. Ker krmilnik SAM3X8E oziroma Arduino Due nima nobenega vgrajenega modula za brezžično komunikacijo. Možna je sicer uporaba t. i. Arduino WiFi 101 Shield, ki ima podporo za 5 V in 3.3 V način delovanja, slednji je obvezen za krmilnik na Due, problem pa je, da izdelek ni več v prodaji in niti ni bil precej poceni rešitev (cena naj bi bila okrog 45 EUR).
+
+Zato sem se odločil, da uporabim precej dostopen modul ESP-01, ki ga je možno kupiti relativno poceni (iz uvoza stanejo pod 2 EUR). Na tem modulu je glavna komponenta mikrokrmilnik Espressif ESP8266EX, poleg tega pa običajno vsebujejo še 512 KiB oziroma 1 MiB pomnilnika flash za programiranje. Modul deluje na napetosti 3.3 V, kar pomeni, da je povsem kompatibilen z Due, vsebuje 8 priključkov:
+
+...TODO: slika
+
+Običajno se na takšen modul naloži vmesnik za ukaze AT (ang. AT command set), ti ukazi so poznani tudi kot Hayes command set. Ti ukazi so bili prvotno zasnovani za komunikacijo s telefonskimi modemi, uporabljajo pa se tudi na primer za komunikacijo z GSM modemi. Predvidevam, da je ta način komunikacije precej dober, sicer se ne bi pogosto uporabljal, vendar je lahko problem nepoznavanje nabora ukazov (kot v mojem primeru). Učenje in pisanje ukazov, ki bi omogočali pošiljanje in sprejemanje paketov po brezžičnem omrežju pa je tukaj samo del problema.
+
+Drugi del je to, da bi potreboval izdelati še način oziroma program za komunikacijo s HTTP strežnikom (ang. HTTP client). Sam HTTP protokol je sicer še dokaj enostaven in ga je možno študirati iz prosto dostopnih dokumentov, kot je na primer zdaj že nekoliko zastarel dokument RFC2616, ki predstavlja osnutek Hypertext Transfer Protocol - - HTTP/1.1.
+
+Hkrati pa sem ugotovil, da je proizvajalec samega čipa ESP8266 objavil odprtokodne knjižnice za sam čip ter knjižnice za Arduino med temi knjižnicami pa lahko najdemo med drugim tudi zelo enostavne načine za upravljanje z Wi-Fi funkcionalnostjo na čipu ((to je \textit{ESP8266WiFi.h}) ter za komunikacijo z HTTP strežnikom (to je \textit{ESP8266HTTPClient.h}).
+
+Na podlagi teh ugotovitev sem se odločil za lastno implementacijo "modema", torej kot prvo stvar potrebujem neko enostavno strukturo komunikacije ukazov med moduloma, tako kot ima na primer AT točno definirane strukture ukazov in njegove odzive. Za enostavnost in preglednost sem si zamislil enostavno komunikacijo, v kateri igra Due vlogo glavne naprave (ang. master), ESP-01 pa vlogo podrejene naprave (ang. slave). Torej Due pošilja ukaze v ESP-01, slednji pa mora odgovoriti z ustreznim odgovorom glede na ukaz in v ustreznem času. Vsak ukaz in vsak odgovor (razen določenih izjem), se mora zaključiti z znakom za novo vrstico (ta znak se v programiranju zapiše kot '$\backslash$n'), argumenti ukaza pa so ločeni s presledkom. Iz tega, sem definiral osnovni nabor ukazov:
+
+\begin{footnotesize}
+	\begin{center}
+		\begin{longtable}{p{0.22\linewidth}|p{0.2\linewidth}|p{0.5\linewidth}}
+			\caption{Nabor ukazov za komunikacijo z ESP-01}
+			\label{instruction_set_ESP_01} \\
+			Ukaz & Odziv & Opis delovanja \\ \hline \hline
+			\textit{status} & \textit{OK} & Modul vrne stanje OK v kolikor je pripravljen na sprejem ukazov. \\ \hline
+			\textit{connect \%SSID \%PASSWORD} & \textit{OK} oz. besedilo napake & Poskusi se povezati na dostopno točko z nazivom \textit{\%SSID} in geslom \textit{\%PASSWORD},\\ \\
+			\multicolumn{3}{l}{\quad Pogoste napake:} \\
+			\multicolumn{2}{l|}{\quad\quad \textit{Connection failed. SSID is empty}} & Manjka ime omrežja \\
+			\multicolumn{2}{l|}{\quad\quad \textit{Connection failed. Password is empty}} & Manjka geslo \\
+			\multicolumn{2}{l|}{\quad\quad \textit{Connection failed}} & Povezava ni uspela \\
+			\multicolumn{2}{l|}{\quad\quad \textit{Connection timed out}} & Povezovanje je trajalo predolgo \\ \hline
+			\textit{play\_next} & \textit{OK} & Pošlje ukaz za prestavitev na naslednji posnetek v vrsti na strežnik \\ \hline
+			\textit{play\_previous} & \textit{OK} & Pošlje ukaz za prestavitev na prejšnji posnetek v vrsti na strežnik \\ \hline
+			\textit{get\_currently\_playing} &  & Pridobi informacije o trenutnem posnetku iz strežnika \\ \\
+			& \textit{OK PLAYING \{0\};\{1\};\{2\};\{3\}} & Informacije so pridobljene \\
+			\multicolumn{3}{l}{\quad Argumenti:} \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{0\}}} & Dolžina posnetka v ms \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{1\}}} & Frekvenca vzorčenja v Hz \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{2\}}} & Trenutni odsek (current chunk) \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{3\}}} & Število odsekov (total chunks) \\ \
+			& \textit{OK STOPPED} & Predvajanje je ustavljeno \\ \\
+			& \textit{FAIL} & Napaka pri pridobivanju podatkov \\ \hline
+			
+			\textit{get\_track\_info \%ID} &  & Pridobi informacije o posnetku z identifikatorjem \%ID iz strežnika \\ \\
+			& \textit{OK \{0\};\{1\}} & Informacije so pridobljene \\
+			\multicolumn{3}{l}{\quad Argumenta:} \\
+			% \multicolumn{2}{l|}{\quad\quad \textit{\{0\}}} & Dolžina posnetka v ms \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{0\}}} & Frekvenca vzorčenja v Hz \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{1\}}} & Število odsekov (total chunks) \\ \\
+			& \textit{FAIL} & Napaka pri pridobivanju podatkov \\ \hline
+			
+			\textit{get\_chunk \%ID \%CHUNK\_INDEX} &  & Prenesi zahtevani odsek \%CHUNK\_INDEX posnetka \%ID iz strežnika \\ \\
+			& \textit{OK \{0\}}, nato podatki & Odsek uspešno prenešen \\
+			\multicolumn{3}{l}{\quad Argumenti:} \\
+			\multicolumn{2}{l|}{\quad\quad \textit{\{0\}}} & Dolžina podatkov \\
+			\multicolumn{2}{l|}{\quad\quad podatki} & Podatki so celoštevilske vrednosti signala \\ \\
+			& \textit{FAIL} & Napaka pri pridobivanju podatkov \\ \hline
+			
+			\textit{get\_current\_time} &  & Pridobi trenutni čas iz strežnika \\ \\
+			& \textit{OK YYYY-MM-DD HH:mm:ss} & Čas pridobljen \\ \\
+			& \textit{FAIL} & Napaka pri pridobivanju podatkov \\ \hline
+		\end{longtable}
+	\end{center}
+\end{footnotesize}
+
+V podprojektu modem-esp8266 sem nato upoštevajoč zgornje definicije razvil program, ki preko serijskega vmesnika prebira podatke in ob vsakem znaku '\\n' izvede ustrezen ukaz. Ukazi na strežnik uporabljajo \textit{HTTPClient}, ki omogoča pošiljanje zahtev na strežnik in enostavno branje odziva. Na drugi strani pa je Due s projektom due-radio, v katerega sem dodal gonilnik \textit{esp\_module.h} za komnikacijo z modulom. Pri tem sem uporabil precej podoben način komunikacije kot že prej za implementacijo konzole. Podobno kot pri gonilniku za LCD zaslon, kjer sem smiselno ločil visokonivojske operacije od nizkonivojskih. Tu predstavljajo visokonivojske operacije ukazi za inicializacijo ter funkcije, ki poenostavijo pošiljanje ukazov iz definicij ter njihov sprejem. Nizkonivojske operacije pa uporabljajo predponi \textit{esp\_module\_rx\_} in \textit{esp\_module\_tx\_} in so namenjene neposrednemu pošiljanju podatkov v in iz modula.
+
+Pri vračanju podatkov pa sem definiral še določene strukture na primer za informacije o posnetku in času, ki jih visokonivojske funkcije ustrezno uporabijo in mi omogoča hitro uporabo v drugih delih kode:
+
+\begin{lstlisting}
+// Podatki o dolocenem posnetku
+typedef struct {
+	//char* track_path;  // Trenutno ni implementirano
+	int32_t track_length_ms;    // Dolzina posnetka v ms
+	int32_t sampling_frequency; // Frekvenca vzorcenja v Hz
+	int32_t total_chunks;       // Skupno stevilo odsekov
+} track_info;
+
+// Podatki o posnetku, ki se trenutno predvaja na strezniku
+typedef struct {
+	track_info track;      // Podatki o posnetku
+	int32_t current_chunk; // Trenuten odsek
+} currently_playing_info;
+
+// Trenuten cas, razdeljen v locene spremenljivke
+typedef struct {
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minutes;
+	int seconds;
+} current_time;
+\end{lstlisting}
+
+
+\subsection{\textit{esp\_module.h} referenca}
+
+\begin{itemize}
+	\item[] \lstinline{void esp_module_hardware_setup(lcd_t* lcd_ptr)}\newline
+	Inicializira strojno opremo ESP modula, vhodni parameter \lstinline{lcd_ptr} je privzeti LCD zaslon, na katerega naj se izpišejo morebitne napake.
+	\item[] \lstinline{bool esp_module_init(void)}\newline
+	Poskusi inicializirati ESP modul z ukazom \textit{status}.
+	\item[] \lstinline{bool esp_module_wifi_connect(const char* ssid, const char* password)}\newline
+	Začne povezavo na brezžično omrežje.
+	\item[] \lstinline{void esp_module_play_next()}\newline
+	Pošlje ukaz za naslednji posnetek.
+	\item[] \lstinline{void esp_module_play_previous()}\newline
+	Pošlje ukaz za prejšnji posnetek.
+	\item[] \lstinline{currently_playing_info* esp_module_get_currently_playing()}\newline
+	Pridobi informacije o posnetku, ki se trenutno predvaja. V kolikor se ne predvaja, oziroma je prišlo do napake, bo vrnjen kazalec enak \lstinline{NULL}.
+	\item[] \lstinline{track_info* esp_module_get_track_info(int track_id)}\newline
+	Pridobi informacije o izbranem posnetku. V kolikor je prišlo do napake, bo vrnjen kazalec enak \lstinline{NULL}.
+	\item[] \lstinline{uint8_t* esp_module_get_chunk(int track_id, int chunk_index)}\newline
+	Začne prenos segmenta izbranega posnetka. Dolžina segmenta se shrani in podatki se zapisujejo v FIFO vrsto, dokler niso vsi prebrani. Med branjem ni možna prekinitev.
+	\item[] \lstinline{current_time* esp_module_get_current_time()}\newline
+	Pridobi informacijo o trenutnem času s strežnika. V kolikor je prišlo do napake, bo vrnjen kazalec enak \lstinline{NULL}.
+\end{itemize}
+
+
+
+\section{Implementacija predvajalnika glasbe}
+
+--------------------------TODO!!!!
+
+
+
+
+\section{Strežnik za glasbo (projekt wav-server)}
+
+Zadnja problematika kar se programiranja tiče, je izdelava programa, na katerega se bo lahko modul povezal in z njim komuniciral. Uporabil sem platformo Node.js in skriptni jezik TypeScript. Znotraj tega pa sem uporabil knjižnice \textit{express} za HTTP strežnik, \textit{moment} za formatiranje časa, \textit{wavefile} za nalaganje in ustrezno preoblikovanje zvočnega signala. 
+
+Opažam, da se programi v skriptnih jezikih precej hitro zakomplicirajo in celotna koda v eni datoteki postane zelo nepregledna. Zato sem ta podprojekt razdelil v več datotek:
+
+\begin{itemize}
+	\item \textit{main.ts}
+	Zagonska skripta programa, naloži konstante za seznam predvajanja, nastavitve strežnika in zažene strežnik.
+	\item \textit{wavserver.ts}
+	HTTP strežnik, sprejema zahteve, jih ustrezno izvede in vrne HTTP odziv.
+	\item \textit{Streamer.ts}
+	Streamer je mišljeno v tem smislu, da skrbi za seznam predvajanja, ustrezno distribuiranje segmentov posnetka večim poslušalcem (v kolikor je to ustrezno implementirano) in ustrezno nadaljevanje na naslednji segment posnetka.
+	\item \textit{Playlist.ts}
+	Seznam predvajanja skrbi za pripravo posnetkov iz seznama, hranjenje podatkov o trenutnem posnetku in premikanju po seznamu (naslednji, prejšnji posnetek). V tej datoteki se nahaja tudi definicija elementa iz seznama predvajanja, ki vsebuje posnetek (Track).
+	\item \textit{Track.ts}
+	Track oziroma posnetek je objekt, ki vsebuje različne podatke o posnetku (pot do datoteke, frekvenca vzorčenja, velikost segmentov, število segmentov), poleg tega pa hrani tudi celoten posnetek v obliki 8-bitnih števil, ki se ga uporablja za rezanje na segmente. Poskrbi pa tudi za nalaganje podatkov iz datoteke in pretvorbo v ustrezno obliko (8-bitna globina z ustrezno frekvenco vzorčenja).
+	\item \textit{config.ts}
+	Datoteka, ki hrani konfiguracijo strežnika. Ta datoteka naj bo kopirana iz datoteke \textit{config.ts.example}, saj ni shranjena v orodju za beleženje zgodovine. Potrebno je dodati tudi zvočne posnetke, najboljše je ustvariti mapo \textit{music} v isti mapi kot config.ts in posnetke dodati v to mapo. V konfiguraciji je potrebno navesti pot do vsakega od posnetekov.
+\end{itemize}
+
+
+
+\section{Sestavljanje \textit{main.c}}
+
+Zdaj je večina programskega dela končno napisana, manjka pa samo še dejanski program na mikrokrmilniku, ki bo vse skupaj povezal in začel predvajati glasbo. 
+
+To bo naloga datoteke \textit{main.c}, v projektu due-radio. V njej se nahaja funkcija \lstinline{int main(void)}, ki je vstopna točka programa in se zažene z mikrokrmilnikom. Tu bo torej potrebno inicializirati vso potrebno strojno opremo, se povezati na omrežje in poskrbeti, da predvajanje normalno deluje.
+
+V smislu Arduino programiranja, sem si funkcijo \textit{main} razširil na funkcijo za inicializacijo \lstinline{bool boot_setup(void)} ter na glavno neskončno zanko \lstinline{void main_loop(void)}. Znotraj funkcije \textit{main} tako kličem funkcijo \textit{boot\_setup} in preverim njen rezultat. V primeru, da je bil zagon neuspešen, sem se odločil da implementiram enostaven mehanizem, ki krmilnik resetira in ponovno preizkusi zagon po nekem določenem času (na primer po 10 sekundah). Koda v \textit{main} funkciji izgleda približno tako:
+
+\begin{lstlisting}
+int main(void)
+{
+	...
+	// Na zacetku je inicializacija mikrokrmilnika za pravilno delovanje
+	
+	// Zagon sistema
+	bool setup_successful = boot_setup();
+	if (setup_successful)
+	{
+		// Zagon uspesen.
+		
+		while (1)
+		{
+			// Izvajanje programa v glavni zanki.
+			main_loop();
+		}
+	}
+	else
+	{
+		// Zagon neuspesen.
+		delay_ms(3000);
+		lcd_write_upper_formatted(&lcd, "Boot setup fail");
+		lcd_write_lower_formatted(&lcd, "Cannot continue");
+		
+		console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+		"\n\nBoot setup has failed...\nCannot continue." CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+		
+		console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+		"Resetting in 10 seconds." CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+		
+		delay_ms(10000);
+		
+		// Koda za ponoven zagon sistema
+		__DSB;
+		SCB->AIRCR = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
+		RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
+		NVIC_SystemReset();
+		
+		// Prepreci izvajanje cesarkoli drugega pred ponastavitvijo
+		while (1)
+		{
+		}
+	}
+	
+	while (1); // Backup
+}
+\end{lstlisting}
+
+Kar se tiče zagona sistema, si procesi sledijo v naslednjem vrstnem redu:
+
+\begin{enumerate}
+	\item Inicializacija osnovne strojne opreme mikrokrmilnika (delay, ioport, timeguard).
+	\item Inicializacija gonilnika za tipke.
+	\item Inicializacija LCD zaslona in prikaz osnovnih informacij.
+	\item Inicializacija serijske konzole in izpis pozdravnega sporočila.
+	\item Inicializacija gonilnika za digitalno-analogni pretvornik (DAC).
+	\item Inicializacija ESP-01 modula.
+	\item Povezovanje v Wi-Fi omrežje.
+	\item Sinhronizacija trenutnega časa.
+\end{enumerate}
+
+V glavni zanki pa se periodično izvajajo naslednja opravila:
+
+\begin{enumerate}
+	\item Procesiranje pritiskov na tipke.
+	\item Procesiranje vhodov iz konzole (sistem še ni implementiran, saj ni zanesljiv).
+	\item TODO: Izvajanje predvajalnika glasbe.
+	\item TODO: Posodobitev časa / prikaz na zaslonu.
+\end{enumerate}
 
 
 

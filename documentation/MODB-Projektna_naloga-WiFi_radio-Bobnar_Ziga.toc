@@ -18,6 +18,13 @@
 \contentsline {section}{\numberline {2.3}FIFO vrsta (First in, first out)}{16}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}\textit {fifo.h} referenca}{17}{subsection.2.3.1}%
 \contentsline {section}{\numberline {2.4}Konzola (komunikacija z računalnikom)}{18}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}\textit {console.h} referenca}{19}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.1}\textit {console.h} referenca}{18}{subsection.2.4.1}%
 \contentsline {section}{\numberline {2.5}Enostaven časovnik (timeguard)}{20}{section.2.5}%
 \contentsline {subsection}{\numberline {2.5.1}\textit {timeguard.h} referenca}{20}{subsection.2.5.1}%
+\contentsline {section}{\numberline {2.6}Gonilnik za tipke}{20}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}\textit {buttons.h} referenca}{22}{subsection.2.6.1}%
+\contentsline {section}{\numberline {2.7}Wi-Fi komunikacija}{22}{section.2.7}%
+\contentsline {subsection}{\numberline {2.7.1}\textit {esp\_module.h} referenca}{26}{subsection.2.7.1}%
+\contentsline {section}{\numberline {2.8}Implementacija predvajalnika glasbe}{27}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Strežnik za glasbo (projekt wav-server)}{27}{section.2.9}%
+\contentsline {section}{\numberline {2.10}Sestavljanje \textit {main.c}}{28}{section.2.10}%
