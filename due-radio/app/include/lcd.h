@@ -110,53 +110,53 @@ void lcd_init(lcd_t* lcd);
 /**
 * Write contents of lcd_string to the display
 */
-void lcd_write_lcd_string(lcd_t* lcd);
+void lcd_write_lcd_string();
 
 /**
 * Write the value to the LCD as characters
 * @param value 32 characters + 1 null terminator string
 */
-void lcd_write_string(lcd_t* lcd, uint8_t* value);
+void lcd_write_string(uint8_t* value);
 
 /**
  * Write formatted string to the LCD using sprintf.
  */
-void lcd_write_formatted(lcd_t* lcd, const char* format, ...)
-    __attribute__((format (__printf__, 2, 0)));
+void lcd_write_formatted(const char* format, ...)
+    __attribute__((format (__printf__, 1, 0)));
 
 /**
  * Write formatted string to the upper row of LCD using sprintf.
  */
-void lcd_write_upper_formatted(lcd_t* lcd, const char* format, ...)
-    __attribute__((format (__printf__, 2, 0)));
+void lcd_write_upper_formatted(const char* format, ...)
+    __attribute__((format (__printf__, 1, 0)));
 
 /**
  * Write formatted string to the lower row of the LCD using sprintf.
  */
-void lcd_write_lower_formatted(lcd_t* lcd, const char* format, ...)
-    __attribute__((format (__printf__, 2, 0)));
+void lcd_write_lower_formatted(const char* format, ...)
+    __attribute__((format (__printf__, 1, 0)));
 
 /**
 * Write string to the current position of LCD cursor
 * @param value String to write to display
 * @param length Number of characters of string to send to display
 */
-void lcd_write_string_at_cursor(lcd_t* lcd, uint8_t* value, uint8_t length);
+void lcd_write_string_at_cursor(uint8_t* value, uint8_t length);
 
 /**
 * Blocking wait until the display has cleared busy status
 */
-void lcd_wait_busy_status(lcd_t* lcd);
+void lcd_wait_busy_status();
 
 /**
  * Clears the top row of the lcd
  */
-void lcd_clear_upper(lcd_t* lcd);
+void lcd_clear_upper();
 
 /**
  * Clears the bottom row of the lcd
  */
-void lcd_clear_lower(lcd_t* lcd);
+void lcd_clear_lower();
 
 
 /**
@@ -168,19 +168,19 @@ void lcd_clear_lower(lcd_t* lcd);
 /**
 * Sends the clear display command to the LCD
 */
-void lcd_command_clear_display(lcd_t* lcd);
+void lcd_command_clear_display();
 
 /**
 * Sends the return home comand to the LCD
 */
-void lcd_command_return_home(lcd_t* lcd);
+void lcd_command_return_home();
 
 /**
 * Sends set entry mode command to the LCD
 * @param increment Decrement or increment
 * @param display_shift Accompanies display shift
 */
-void lcd_command_entry_mode_set(lcd_t* lcd, bool increment, bool display_shift);
+void lcd_command_entry_mode_set(bool increment, bool display_shift);
 
 /**
 * Sends the display on/off control command to the LCD
@@ -188,14 +188,14 @@ void lcd_command_entry_mode_set(lcd_t* lcd, bool increment, bool display_shift);
 * @param cursor Set cursor on/off
 * @param blinking Enable/disable blinking
 */
-void lcd_command_display_on_off(lcd_t* lcd, bool display, bool cursor, bool blinking);
+void lcd_command_display_on_off(bool display, bool cursor, bool blinking);
 
 /**
 * Sends the cursor or display shift command to the LCD
 * @param display_shift Display shift/cursor move
 * @param shift_right Shift direction (right/left)
 */
-void lcd_command_cursor_or_display_shift(lcd_t* lcd, bool display_shift, bool shift_right);
+void lcd_command_cursor_or_display_shift(bool display_shift, bool shift_right);
 
 /**
 * Sends the function set command to the LCD
@@ -204,7 +204,6 @@ void lcd_command_cursor_or_display_shift(lcd_t* lcd, bool display_shift, bool sh
 * @param full_height_character_font 5x8/5x10 dots character font
 */
 void lcd_command_function_set(
-lcd_t* lcd,
 bool full_data_length,
 bool double_line,
 bool full_height_character_font);
@@ -213,49 +212,49 @@ bool full_height_character_font);
 * Sends the set CGRAM address command to the LCD
 * @param address 6-bit character generator RAM address
 */
-void lcd_command_set_cgram_address(lcd_t* lcd, uint8_t address);
+void lcd_command_set_cgram_address(uint8_t address);
 
 /**
 * Sends the set DDRAM address to the LCD
 * @param address 7-bit display data RAM address
 */
-void lcd_command_set_ddram_address(lcd_t* lcd, uint8_t address);
+void lcd_command_set_ddram_address(uint8_t address);
 
 /**
 * Sends the read busy flag command to the LCD
 * @returns Whether the display is busy or is ready to accept instructions
 */
-bool lcd_command_read_busy_flag(lcd_t* lcd);
+bool lcd_command_read_busy_flag();
 
 /**
 * Sends the data or DDRAM value to the LCD
 * @param value 8-bit value that will be sent to the display
 */
-void lcd_driver_data_write(lcd_t* lcd, uint8_t value);
+void lcd_driver_data_write(uint8_t value);
 
 /**
 * Reads the data or DDRAM value from the LCD
 * @returns 8-bit data value
 */
-uint8_t lcd_driver_data_read(lcd_t* lcd);
+uint8_t lcd_driver_data_read();
 
 /**
 * Sends the raw data and sets appropriate pins for command/data operations
 * @param value The value to write to data pins
 * @param is_command Determines whether the operation is command or data
 */
-void lcd_driver_raw_send(lcd_t* lcd, uint8_t value, bool is_command);
+void lcd_driver_raw_send(uint8_t value, bool is_command);
 
 /**
 * Sets the lower 4 bits of the value on data pins
 * @param value The value to write
 */
-void lcd_driver_raw_data_pins_set(lcd_t* lcd, uint8_t value);
+void lcd_driver_raw_data_pins_set(uint8_t value);
 
 /**
 * Sends a pulse (0, 1, 0) to the enable pin of LCD
 */
-void lcd_driver_pulse_enable_pin(lcd_t* lcd);
+void lcd_driver_pulse_enable_pin();
 
 __EXTERN_C_END
 
