@@ -10,7 +10,7 @@ class Streamer {
 
   constructor(
     playlistItems: string[],
-    public chunkSize = 50000,
+    public chunkSize = 20000,
     public sampleRate = 20000
   ) {
     this.playlist = new Playlist(
@@ -85,11 +85,11 @@ class Streamer {
       return;
     }
 
-    console.log(
+    /*console.log(
       `Streamer chunk [${
         Math.round((10000 * chunkIndex) / item.track.chunkCount) / 100
       }%]`
-    );
+    );*/
 
     const chunk = item.track.getChunk(chunkIndex);
 

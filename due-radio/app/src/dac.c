@@ -27,7 +27,7 @@ bool dac_tx_ready() {
 }
 
 void dac_write(uint32_t value) {
-	dacc_write_conversion_data(DACC, value);
+	dacc_write_conversion_data(DACC, ((uint32_t)value) * 10);
 }
 
 /*

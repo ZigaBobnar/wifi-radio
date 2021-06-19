@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include "console.h"
 #include "timeguard.h"
+#include "audio_player.h"
 
 __EXTERN_C_BEGIN
 
@@ -277,14 +278,16 @@ track_info *esp_module_get_track_info(int track_id)
     return NULL;
 }
 
-uint8_t* esp_module_get_chunk(int track_id, int chunk_index)
+int esp_module_get_chunk(int track_id, int chunk_index)
 {
     console_put_formatted("ESP> Retrieving chunk %i for track id: %i", chunk_index, track_id);
+
+    audio_player_buffering = true;
 
     esp_module_clear_status();
     esp_module_tx_put_formatted("get_chunk %i %i", track_id, chunk_index);
 
-    char *response = esp_module_rx_read_line(127, 2000);
+    /*char *response = esp_module_rx_read_line(127, 2000);
     if (response != NULL)
     {
         if (strlen(response) > 4 && response[0] == 'O' && response[1] == 'K' && response[2] == ' ')
@@ -304,29 +307,38 @@ uint8_t* esp_module_get_chunk(int track_id, int chunk_index)
                 else
                 {
                     chunk_length_str[write_index] = c;
-                    
+
                     write_index++;
                 }
             }
-            
+
             int current_chunk_length = atoi(chunk_length_str);
+            audio_player_buffering_samples_left = current_chunk_length;
 
             free(response);
 
-            // TODO
+            for (int n = 0; n < current_chunk_length; n++) {
+                if (esp_module_rx_read()) {
+                    fifo_write_single(audio_player_buffer, esp_rx_data);
+                    audio_player_buffering_samples_left--;
+                } else {
+                    console_put_formatted("ESP> Read %i chunks from queue.", n + 1);
+                    break;
+                }
+            }
 
-            return chunk_length_str;
+            return current_chunk_length;
         }
         else
         {
             console_put_formatted("ESP> Retrieving chunk failed. Incorrect response %s.", response);
             free(response);
 
-            return NULL;
+            return 0;
         }
-    }
+    }*/
 
-    return NULL;
+    return 0;
 }
 
 current_time *esp_module_get_current_time()
@@ -540,23 +552,29 @@ void USART0_Handler()
     if (USART0->US_IMR & US_IMR_RXRDY)
     {
         uint8_t recv = USART0->US_RHR;
-        fifo_write_single(&esp_rx_fifo, recv);
 
-        if (!reading_raw_chunk)
-        {
-            if (recv != '\n')
-            {
+        if (!audio_player_buffering) {
+            fifo_write_single(&esp_rx_fifo, recv);
+
+            if (recv != '\n') {
                 *(line_buff + line_idx) = recv;
                 line_idx++;
             }
 
-            if (recv == '\n' || line_idx >= 250)
-            {
+            if (recv == '\n' || line_idx >= 250) {
                 console_put_formatted("ESP(RX)> %s", line_buff);
 
                 line_idx = 0;
                 memset(line_buff, 0, sizeof(line_buff));
             }
+        } else {
+            fifo_write_single(audio_player_buffer, recv);
+            audio_player_buffered_samples++;
+            //audio_player_buffering_samples_left--;
+
+            // if (audio_player_buffering_samples_left < 0) {
+            //     audio_player_buffering = false;
+            // }
         }
     }
 }

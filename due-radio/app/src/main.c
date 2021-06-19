@@ -76,18 +76,7 @@ void main_loop()
     ui_run();
     // console_process_input();
 
-    /*if (reading_raw_chunk)
-    {
-        if (esp_module_rx_char_ready())
-        {
-            esp_module_rx_read();
-
-            if (dac_tx_ready())
-            {
-                dac_write(esp_rx_data * 10);
-            }
-        }
-    }*/
+    audio_player_ensure_buffered();
 }
 
 __EXTERN_C_END

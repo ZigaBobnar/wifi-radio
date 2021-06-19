@@ -121,7 +121,7 @@ void run_command(String command) {
     String track_id, chunk_index;
     bool reading_id = true;
     
-    for (uint i = 8; i < command.length(); i++) {
+    for (uint i = 10; i < command.length(); i++) {
       if (command[i] != ' ') {
         if (reading_id) {
           track_id += command[i];
@@ -244,10 +244,10 @@ void run_command_get_chunk(int track_id, int chunk_index) {
   if (statusCode == HTTP_CODE_OK) {
     String body = http.getString();
     
-    Serial.printf("OK %i\n", body.length());
+    //Serial.printf("OK %i\n", body.length());
     Serial.print(body);
   } else {
-    Serial.printf("FAIL\n");
+    //Serial.printf("FAIL\n");
   }
 
   http.end();
