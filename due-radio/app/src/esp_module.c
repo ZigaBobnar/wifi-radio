@@ -7,7 +7,6 @@
 __EXTERN_C_BEGIN
 
 uint8_t esp_rx_data = 0;
-lcd_t *default_lcd = NULL;
 
 uint8_t esp_rx_fifo_buff[ESP_RX_QUEUE_SIZE];
 fifo_t esp_rx_fifo = {
@@ -17,12 +16,10 @@ fifo_t esp_rx_fifo = {
     .buffer = esp_rx_fifo_buff,
 };
 
-bool stream_running = false;
+bool reading_raw_chunk = false;
 
-void esp_module_hardware_setup(lcd_t *lcd_ptr)
+void esp_module_hardware_setup()
 {
-    default_lcd = lcd_ptr;
-
     pio_set_peripheral(PIOA, PIO_PERIPH_A, PIO_PA10A_RXD0 | PIO_PA11A_TXD0);
     pio_pull_up(PIOA, PIO_PA10A_RXD0 | PIO_PA11A_TXD0, PIO_PULLUP);
 
@@ -280,9 +277,56 @@ track_info *esp_module_get_track_info(int track_id)
     return NULL;
 }
 
-void esp_module_get_chunk(int track_id, int chunk_index)
+uint8_t* esp_module_get_chunk(int track_id, int chunk_index)
 {
-    // TODO.
+    console_put_formatted("ESP> Retrieving chunk %i for track id: %i", chunk_index, track_id);
+
+    esp_module_clear_status();
+    esp_module_tx_put_formatted("get_chunk %i %i", track_id, chunk_index);
+
+    char *response = esp_module_rx_read_line(127, 2000);
+    if (response != NULL)
+    {
+        if (strlen(response) > 4 && response[0] == 'O' && response[1] == 'K' && response[2] == ' ')
+        {
+            console_put_formatted("ESP> Received chunk %i information.", track_id);
+
+            char chunk_length_str[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+            int write_index = 0;
+
+            for (int i = 3; i < strlen(response); i++)
+            {
+                char c = response[i];
+                if (c == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    chunk_length_str[write_index] = c;
+                    
+                    write_index++;
+                }
+            }
+            
+            int current_chunk_length = atoi(chunk_length_str);
+
+            free(response);
+
+            // TODO
+
+            return chunk_length_str;
+        }
+        else
+        {
+            console_put_formatted("ESP> Retrieving chunk failed. Incorrect response %s.", response);
+            free(response);
+
+            return NULL;
+        }
+    }
+
+    return NULL;
 }
 
 current_time *esp_module_get_current_time()
@@ -498,7 +542,7 @@ void USART0_Handler()
         uint8_t recv = USART0->US_RHR;
         fifo_write_single(&esp_rx_fifo, recv);
 
-        if (!stream_running)
+        if (!reading_raw_chunk)
         {
             if (recv != '\n')
             {

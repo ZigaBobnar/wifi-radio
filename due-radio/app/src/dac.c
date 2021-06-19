@@ -3,7 +3,11 @@
 
 __EXTERN_C_BEGIN
 
+dac_t* g_dac;
+
 void dac_init(dac_t* dac) {
+	g_dac = dac;
+
 	//sysclk_enable_peripheral_clock(ID_TC0);
 	sysclk_enable_peripheral_clock(ID_DACC);
 
@@ -11,18 +15,18 @@ void dac_init(dac_t* dac) {
 	dacc_set_transfer_mode(DACC, DACC_MR_WORD_HALF);
 	dacc_set_power_save(DACC, 0x00, 0x00);
 	dacc_set_timing(DACC, 0x08, 0x00, 0x10);
-	dacc_set_channel_selection(DACC, dac->channel);
-	dacc_enable_channel(DACC, dac->channel);
+	dacc_set_channel_selection(DACC, g_dac->channel);
+	dacc_enable_channel(DACC, g_dac->channel);
 	dacc_set_analog_control(DACC, DACC_ANALOG_CONTROL);
 }
 
-bool dac_tx_ready(dac_t* dac) {
+bool dac_tx_ready() {
 	uint32_t dacc_status = dacc_get_interrupt_status(DACC);
 
 	return (dacc_status & DACC_ISR_TXRDY) == DACC_ISR_TXRDY;
 }
 
-void dac_write(dac_t* dac, uint32_t value) {
+void dac_write(uint32_t value) {
 	dacc_write_conversion_data(DACC, value);
 }
 

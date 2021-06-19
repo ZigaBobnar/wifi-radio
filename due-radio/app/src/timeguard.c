@@ -3,8 +3,9 @@
 
 __EXTERN_C_BEGIN
 
-const int32_t time_unit_ms = CLOCKS_PER_SEC * 32;
-const int32_t time_unit_s = CLOCKS_PER_SEC * 32 * 1000;
+// For some reason the multiplier is not 32 but somewhere between 24 and 25
+const int32_t time_unit_ms = CLOCKS_PER_SEC * 25;
+const int32_t time_unit_s = CLOCKS_PER_SEC * 25 * 1000;
 
 
 void timeguard_init() {

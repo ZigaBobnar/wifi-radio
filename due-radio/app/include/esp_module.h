@@ -2,7 +2,6 @@
 #define ESP_MODULE_H_
 
 #include "common.h"
-#include "lcd.h"
 #include "fifo.h"
 
 /**
@@ -15,18 +14,17 @@
  */
 
 #ifndef ESP_RX_QUEUE_SIZE
-#define ESP_RX_QUEUE_SIZE 128
+#define ESP_RX_QUEUE_SIZE 512
 #endif  // ESP_RX_QUEUE_SIZE
 
 __EXTERN_C_BEGIN
 
 extern uint8_t esp_rx_data;
-extern lcd_t* default_lcd;
 
 extern uint8_t esp_rx_fifo_buff[ESP_RX_QUEUE_SIZE];
 extern fifo_t esp_rx_fifo;
 
-extern bool stream_running;
+extern bool reading_raw_chunk;
 
 typedef struct {
     //char* track_path;
@@ -49,7 +47,7 @@ typedef struct {
     int seconds;
 } current_time;
 
-void esp_module_hardware_setup(lcd_t* lcd_ptr);
+void esp_module_hardware_setup(void);
 bool esp_module_init(void);
 
 bool esp_module_wifi_connect(const char* ssid, const char* password);
@@ -57,7 +55,7 @@ void esp_module_play_next();
 void esp_module_play_previous();
 currently_playing_info* esp_module_get_currently_playing();
 track_info* esp_module_get_track_info(int track_id);
-void esp_module_get_chunk(int track_id, int chunk_index);
+uint8_t* esp_module_get_chunk(int track_id, int chunk_index);
 current_time* esp_module_get_current_time();
 //void esp_module_start_stream(void);
 //void esp_module_stop_stream(void);

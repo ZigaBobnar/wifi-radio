@@ -27,8 +27,6 @@ struct _dac {
 };
 typedef struct _dac dac_t;
 
-dac_t* active_dac;
-
 /**
  * Initializes the DACC hardware.
  */
@@ -37,12 +35,12 @@ void dac_init(dac_t* dac);
 /**
  * Checks whether DACC is ready to accept data.
  */
-bool dac_tx_ready(dac_t* dac);
+bool dac_tx_ready();
 
 /**
  * Writes a value to the DACC buffer.
  */
-void dac_write(dac_t* dac, uint32_t value);
+void dac_write(uint32_t value);
 
 __EXTERN_C_END
 

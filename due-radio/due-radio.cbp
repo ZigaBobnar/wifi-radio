@@ -35,13 +35,25 @@
 		</Compiler>
 		<Unit filename="Makefile" />
 		<Unit filename="app/include/asf.h" />
+		<Unit filename="app/include/audio_player.h" />
+		<Unit filename="app/include/buttons.h" />
 		<Unit filename="app/include/common.h" />
 		<Unit filename="app/include/conf_clock.h" />
+		<Unit filename="app/include/config.h" />
 		<Unit filename="app/include/console.h" />
+		<Unit filename="app/include/console_definitions.h" />
 		<Unit filename="app/include/dac.h" />
 		<Unit filename="app/include/esp_module.h" />
 		<Unit filename="app/include/fifo.h" />
 		<Unit filename="app/include/lcd.h" />
+		<Unit filename="app/include/timeguard.h" />
+		<Unit filename="app/include/version.h" />
+		<Unit filename="app/src/audio_player.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="app/src/buttons.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="app/src/console.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -61,6 +73,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="app/src/serial_console.d" />
+		<Unit filename="app/src/timeguard.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="archive.sh" />
 		<Unit filename="asf/common/boards/board.h" />
 		<Unit filename="asf/common/services/clock/dfll.h" />
@@ -123,6 +138,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="asf/sam/drivers/pmc/sleep.h" />
+		<Unit filename="asf/sam/drivers/tc/tc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="asf/sam/drivers/tc/tc.h" />
 		<Unit filename="asf/sam/drivers/uart/uart.c">
 			<Option compilerVar="CC" />
 		</Unit>
