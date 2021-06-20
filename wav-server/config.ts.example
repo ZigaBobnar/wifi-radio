@@ -1,9 +1,22 @@
-const port = 20343;
-const defaultPlaylist = [
-  "./music/file1.wav",
-  "./music/file2.wav",
-  "./music/file3.wav",
-  "./music/file4.wav",
-];
+import { TrackDefinition } from "./TrackDefinition";
 
-export { port, defaultPlaylist };
+export type ServerConfig = {
+  port: number;
+  tracks: TrackDefinition[];
+  chunkSize: number;
+  sampleRate: number;
+};
+
+const serverConfig: ServerConfig = {
+  port: 20343,
+  tracks: [
+    new TrackDefinition("./music/file1.wav"),
+    new TrackDefinition("./music/file2.wav"),
+    new TrackDefinition("./music/file3.wav"),
+    new TrackDefinition("./music/file4.wav"),
+  ],
+  chunkSize: 20000,
+  sampleRate: 20000,
+};
+
+export { serverConfig };

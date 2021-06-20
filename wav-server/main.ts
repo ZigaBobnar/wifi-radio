@@ -1,5 +1,8 @@
-import { WavServer } from "./wavserver";
-import { defaultPlaylist, port } from "./config";
+import { WavServer } from "./WavServer";
+import { serverConfig } from "./config";
 
-const server = new WavServer(port, defaultPlaylist);
-server.startServer();
+(async () => {
+  const server = new WavServer(serverConfig);
+
+  await server.startServer();
+})();

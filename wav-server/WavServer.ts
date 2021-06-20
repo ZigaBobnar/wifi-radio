@@ -1,31 +1,64 @@
 import express, { Express } from "express";
-import { Streamer } from "./Streamer";
 import moment from "moment";
-import { StreamListener } from "./StreamListener";
-
-async function sleep(time_ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, time_ms));
-}
+import { getClientId } from "./utils";
+import { Player } from "./Player";
+import { ServerConfig } from "./config";
 
 class WavServer {
   app: Express;
-  streamer: Streamer;
+  player: Player;
 
-  constructor(public port: number, playlist: string[]) {
+  constructor(public readonly serverConfig: ServerConfig) {
     this.app = express();
-    this.streamer = new Streamer(playlist);
+
+    this.player = new Player(
+      serverConfig.tracks,
+      serverConfig.chunkSize,
+      serverConfig.sampleRate
+    );
 
     /**
      * GET /
      * HTML page that displays current running track
      */
     this.app.get("/", async (req, res) => {
+      const details = await this.player.getPlayerPlaybackDetails();
+
       res.statusCode = 200;
 
-      const playingDetails = this.streamer.getCurrentlyPlayingDetails();
-      let response = `<h1>WiFi Radio controller</h1>`;
+      const playingDetails = this.player.getPlayerPlaybackDetails();
+      let response = `<body style="font-family: 'Roboto', 'Arial'"><h1>WiFi Radio controller</h1>`;
 
-      if (playingDetails.track) {
+      response += `<div><h3>Tracks in playlist</h3><div>`;
+      for (let track of details.tracks) {
+        response += `<div style="padding: 8px"><span style="font-size: 1.2em; font-weight: 600">${
+          track.definition.artist ? track.definition.artist + " - " : ""
+        }${
+          track.definition.title ?? track.definition.path
+        }</span><br />Status: ${
+          track.isLoaded ? "Loaded" : "Not loaded"
+        }<br />${
+          track.isLoaded
+            ? `Duration: ${track.totalLengthMs} ms, Sample rate: ${track.sampleRate} Hz, Chunk length: ${track.chunkSize} bytes`
+            : ""
+        }</div>`;
+      }
+      response += `</div></div>`;
+
+      response += `<div><h3>Connected clients</h3><div>`;
+      for (let clientId in details.clients) {
+        const client = details.clients[clientId];
+        response += `<div style="padding: 8px"><span style="font-size: 1.2em; font-weight: 600">${clientId}</span><br />Track id: ${
+          client.trackId
+        }, Chunk id: ${client.chunkId}<br />${
+          client.trackId >= 0
+            ? `<div>${details.tracks[client.trackId].definition.path}</div><div><a href="/previous?clientId=${clientId}">Previous</a> | <a href="/next?clientId=${clientId}">Next</a></div>`
+            : ""
+        }</div>`;
+      }
+      response += `</div></div>`;
+
+      /*if (playingDetails.track) {
         response += `<div>Currently playing: ${playingDetails.track.path}</div>
           <div>Progress: ${playingDetails.track.percentage}% [chunk ${playingDetails.track.currentChunk} / ${playingDetails.track.totalChunks}]</div>`;
       } else {
@@ -47,15 +80,17 @@ class WavServer {
           </div>
 
           <div><a href="/previous">Previous track</a></div>
-          <div><a href="/next">Next track</a></div>`;
+          <div><a href="/next">Next track</a></div>`;*/
 
-      if (!req.query.noRefresh) {
+      if (!req.query.no_refresh) {
         response += `<script>
             setTimeout(() => {
                 location.reload();
             }, 800);
         </script>`;
       }
+
+      response += `</body>`;
 
       res.send(response);
     });
@@ -65,7 +100,7 @@ class WavServer {
      * Skips to next track and redirects back to info page
      */
     this.app.get("/next", async (req, res) => {
-      this.streamer.playNextTrackFromPlaylist();
+      this.player.moveForward(getClientId(req));
 
       res.redirect("/");
     });
@@ -75,37 +110,27 @@ class WavServer {
      * Skips to previous track and redirects back to info page
      */
     this.app.get("/previous", async (req, res) => {
-      this.streamer.playPreviousTrackFromPlaylist();
+      this.player.moveBackward(getClientId(req));
 
       res.redirect("/");
     });
 
-    this.app.get("/stream", async (req, res) => {
-      console.log(`Client connected (${req.socket.remoteAddress})`);
+    this.app.get("/next-chunk", async (req, res) => {
+      const clientId = getClientId(req);
 
-      const listener = new StreamListener(
-        Math.random().toString(36).substr(2, 5),
-        (chunk) => {
-          res.write(chunk);
-        }
-      );
+      console.log(`Client ${clientId} requested next chunk`);
 
-      let client_connected = true;
+      const chunk = await this.player.getNextChunk(clientId);
+      if (!chunk || chunk.data.length == 0) {
+        res.statusCode = 404;
+        res.send("NOTFOUND");
+      } else {
+        console.log(
+          `Client ${clientId} => sending track ${chunk.trackId}, chunk ${chunk.chunkId}`
+        );
 
-      req.on("close", () => {
-        console.log(`Client disconnected (${req.socket.remoteAddress})`);
-
-        this.streamer.detachListener(listener);
-
-        client_connected = false;
-      });
-
-      res.statusCode = 200;
-
-      this.streamer.attachListener(listener);
-
-      while (client_connected) {
-        await sleep(500);
+        res.statusCode = 200;
+        res.write(chunk.data);
       }
 
       res.end();
@@ -117,7 +142,7 @@ class WavServer {
      * Response is in format PLAYING <TODO: track_path>;<track_length_ms>;<sampling_frequency>;<current_chunk>;<total_chunks>
      * or STOPPED
      */
-    this.app.get("/track/current", async (req, res) => {
+    /*this.app.get("/track/current", async (req, res) => {
       console.log(
         `Client requested current track info (${req.socket.remoteAddress})`
       );
@@ -135,14 +160,14 @@ class WavServer {
       }
 
       res.end();
-    });
+    });*/
 
     /**
      * GET /track/:trackIndex
      * Retrieves track information for specified trackIndex (index in playlist)
      * Response is in format <track_path>;<track_length_ms>;<sampling_frequency>;<total_chunks>
      */
-    this.app.get("/track/:id", async (req, res) => {
+    /*this.app.get("/track/:id", async (req, res) => {
       console.log(
         `Client requested track info for ${req.params.id} (${req.socket.remoteAddress})`
       );
@@ -157,37 +182,7 @@ class WavServer {
       res.send(`${trackInfo.samplingFrequency}${trackInfo.totalChunks}`);
 
       res.end();
-    });
-
-    /**
-     * GET /track/:trackIndex/chunk/:chunkIndex
-     * Get the raw data of specified chunk of specified track.
-     */
-    this.app.get("/track/:id/chunk/:chunkIndex", async (req, res) => {
-      console.log(
-        `Client requested track ${req.params.id}, chunk ${req.params.chunkIndex} (${req.socket.remoteAddress})`
-      );
-
-      const item = this.streamer.playlist.getItem(parseInt(req.params.id));
-      if (!item) {
-        res.statusCode = 404;
-        res.send("NOTFOUND");
-        res.end();
-        return;
-      }
-
-      const chunk = item.track.getChunk(parseInt(req.params.chunkIndex));
-      if (!chunk || chunk.length == 0) {
-        res.statusCode = 404;
-        res.send("NOTFOUND");
-        res.end();
-        return;
-      }
-
-      res.statusCode = 200;
-      res.write(chunk);
-      res.end();
-    });
+    });*/
 
     /**
      * GET /time/now
@@ -204,12 +199,16 @@ class WavServer {
     });
   }
 
-  startServer() {
-    this.app.listen(this.port, () => {
-      console.info(`WavServer is running on http://localhost:${this.port}`);
+  async startServer() {
+    await this.player.init();
+
+    this.app.listen(this.serverConfig.port, () => {
+      console.info(
+        `WavServer is running on http://localhost:${this.serverConfig.port}`
+      );
     });
 
-    this.streamer.startPlaylist();
+    // await this.player.loadMedia();
   }
 }
 
