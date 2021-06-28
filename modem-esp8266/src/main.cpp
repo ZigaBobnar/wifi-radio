@@ -14,6 +14,7 @@ void run_command_play_previous();
 void run_command_get_currently_playing();
 void run_command_get_track_info(int track_id);
 void run_command_get_chunk(int track_id, int chunk_index);
+void run_command_get_next_chunk();
 void run_command_get_current_time();
 // void run_stream(void);
 // void run_command_start_stream(void);
@@ -147,6 +148,8 @@ void run_command(String command) {
     int chunk_index_int = atoi(chunk_index.c_str());
 
     run_command_get_chunk(track_id_int, chunk_index_int);
+  } else if (command == "get_next_chunk") {
+    run_command_get_next_chunk();
   } else if (command == "get_current_time") {
     run_command_get_current_time();
   } else {
@@ -245,6 +248,21 @@ void run_command_get_chunk(int track_id, int chunk_index) {
     String body = http.getString();
     
     //Serial.printf("OK %i\n", body.length());
+    Serial.print(body);
+  } else {
+    //Serial.printf("FAIL\n");
+  }
+
+  http.end();
+}
+
+void run_command_get_next_chunk() {
+  HTTPClient http;
+  String endpoint = String("/next-chunk");
+  http.begin(api_url + endpoint);
+  int statusCode = http.GET();
+  if (statusCode == HTTP_CODE_OK) {
+    String body = http.getString();
     Serial.print(body);
   } else {
     //Serial.printf("FAIL\n");

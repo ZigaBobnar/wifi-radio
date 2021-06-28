@@ -341,6 +341,16 @@ int esp_module_get_chunk(int track_id, int chunk_index)
     return 0;
 }
 
+void esp_module_get_next_chunk()
+{
+    console_put_formatted("ESP> Retrieving next chunk");
+
+    audio_player_buffering = true;
+
+    esp_module_clear_status();
+    esp_module_tx_put_formatted("get_next_chunk");
+}
+
 current_time *esp_module_get_current_time()
 {
     console_put_line("ESP> Querying current time");

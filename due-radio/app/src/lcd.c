@@ -46,6 +46,7 @@ void lcd_init(lcd_t* lcd) {
     // This will initialize the display for 4-bit operation
     lcd_driver_raw_data_pins_set((functionSet) >> 4);
     lcd_driver_pulse_enable_pin();
+    delay_us(4000);
     lcd_wait_busy_status();
 
     // Now we can fully run function set command again.
@@ -54,6 +55,7 @@ void lcd_init(lcd_t* lcd) {
         /* full_data_length */ false,
         /* double_line */ true,
         /* full_height_character_font */ false);
+    delay_us(100);
     lcd_wait_busy_status();
 
     /*ioport_set_pin_level(lcd->rs, 0);

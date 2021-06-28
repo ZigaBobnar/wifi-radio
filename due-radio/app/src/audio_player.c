@@ -81,13 +81,9 @@ void audio_player_ensure_buffered(void) {
 }
 
 void audio_player_fill_buffer() {
-	static int chunk = 0;
-
 	console_put_formatted("AudioPlayer> Filling buffer...");
 
-	esp_module_get_chunk(0, chunk);
-
-	chunk++;
+	esp_module_get_next_chunk();
 }
 
 __EXTERN_C_END

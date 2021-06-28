@@ -56,6 +56,7 @@ void esp_module_play_previous();
 currently_playing_info* esp_module_get_currently_playing();
 track_info* esp_module_get_track_info(int track_id);
 int esp_module_get_chunk(int track_id, int chunk_index);
+void esp_module_get_next_chunk();
 current_time* esp_module_get_current_time();
 //void esp_module_start_stream(void);
 //void esp_module_stop_stream(void);

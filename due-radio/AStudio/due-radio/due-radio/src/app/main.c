@@ -1,0 +1,80 @@
+#include "common.h"
+#include "drivers/buttons.h"
+#include "drivers/esp_module.h"
+#include "drivers/dac.h"
+#include "drivers/lcd.h"
+#include "drivers/console.h"
+#include "utils/timeguard.h"
+#include "app/audio_player.h"
+#include "app/ui.h"
+#include "app/setup.h"
+#include "utils/board.h"
+
+#include <time.h>
+
+__EXTERN_C_BEGIN
+
+bool boot_setup(void);
+void main_loop(void);
+
+int main(void)
+{
+    /* sets the processor clock according to conf_clock.h definitions */
+    sysclk_init();
+
+    /* disable wathcdog */
+    WDT->WDT_MR = WDT_MR_WDDIS;
+
+    /*****************************   HW init     *****************************/
+    bool setup_successful = setup_begin();
+    if (setup_successful)
+    {
+        // Initialization has succeeded.
+        ui_set_state(UI_STATE_CLOCK);
+        /***************************   Main loop   ***************************/
+
+        while (1)
+        {
+            main_loop();
+        }
+    }
+    else
+    {
+        ui_set_state(UI_STATE_ERROR);
+        // Boot has failed, abort.
+        delay_ms(3000);
+        lcd_write_upper_formatted("Boot setup fail");
+        lcd_write_lower_formatted("Cannot continue");
+
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+                         "\n\nBoot setup has failed...\nCannot continue." CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+
+#if WIFI_RADIO_AUTOREBOOT == 1
+        console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
+                         "Resetting in 10 seconds." CONSOLE_VT100_COLOR_TEXT_DEFAULT);
+
+        delay_ms(10000);
+
+		board_reboot();
+#endif
+
+        while (1)
+        {
+            ui_run();
+        }
+    }
+
+    while (1)
+    {
+    }
+}
+
+void main_loop()
+{
+    ui_run();
+    // console_process_input();
+
+    audio_player_ensure_buffered();
+}
+
+__EXTERN_C_END
