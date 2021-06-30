@@ -51,5 +51,5 @@
 PROJ=$(PN)
 export PROJ
 
-MAKEFILE_PATH = asf/sam/utils/make/Makefile.sam.in
+MAKEFILE_PATH = lib/ASF/sam/utils/make/Makefile.sam.in
 include $(MAKEFILE_PATH)

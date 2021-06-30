@@ -44,7 +44,7 @@ void console_enable(void);
  *
  * This checks if a valid command has been provided and executes it.
  */
-void console_process_input(void);
+// void console_process_input(void);
 
 
 /**

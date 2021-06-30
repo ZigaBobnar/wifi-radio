@@ -54,19 +54,20 @@ TARGET_SRAM = $(PN).elf
 
 # List of C source files.
 CSRCS = \
-	$(wildcard app/src/*.c)										\
-	asf/sam/utils/cmsis/sam3x/source/templates/system_sam3x.c		\
-	asf/sam/utils/cmsis/sam3x/source/templates/exceptions.c			\
-	asf/sam/utils/cmsis/sam3x/source/templates/gcc/startup_sam3x.c	\
-	asf/common/services/clock/sam3x/sysclk.c						\
-	asf/common/services/delay/sam/cycle_counter.c					\
-	asf/sam/utils/syscalls/gcc/syscalls.c                          	\
-	asf/sam/drivers/pmc/pmc.c										\
-	asf/sam/drivers/pio/pio.c										\
-	asf/sam/drivers/uart/uart.c										\
-	asf/sam/drivers/usart/usart.c									\
-	asf/sam/drivers/dacc/dacc.c									    \
-	asf/sam/drivers/tc/tc.c									    	\
+	$(wildcard src/*.c)													\
+	$(wildcard src/**/*.c)												\
+	lib/ASF/sam/utils/cmsis/sam3x/source/templates/system_sam3x.c		\
+	lib/ASF/sam/utils/cmsis/sam3x/source/templates/exceptions.c			\
+	lib/ASF/sam/utils/cmsis/sam3x/source/templates/gcc/startup_sam3x.c	\
+	lib/ASF/common/services/clock/sam3x/sysclk.c						\
+	lib/ASF/common/services/delay/sam/cycle_counter.c					\
+	lib/ASF/sam/utils/syscalls/gcc/syscalls.c                          	\
+	lib/ASF/sam/drivers/pmc/pmc.c										\
+	lib/ASF/sam/drivers/pio/pio.c										\
+	lib/ASF/sam/drivers/uart/uart.c										\
+	lib/ASF/sam/drivers/usart/usart.c									\
+	lib/ASF/sam/drivers/dacc/dacc.c									    \
+	lib/ASF/sam/drivers/tc/tc.c									    	\
 
 
 # List of assembler source files.
@@ -74,26 +75,26 @@ ASSRCS =
 
 # List of include paths.
 INC_PATH = \
-	app/include								\
-	asf/sam/boards								\
-	asf/sam/utils								\
-	asf/sam/utils/header_files					\
-	asf/sam/utils/preprocessor					\
-	asf/sam/utils/cmsis/sam3x/include			\
-	asf/sam/utils/cmsis/sam3x/source/templates	\
-	asf/common/boards							\
-	asf/common/utils							\
-	asf/thirdparty/CMSIS/include				\
-	asf/common/services/gpio					\
-	asf/common/services/clock					\
-	asf/common/services/delay					\
-	asf/common/services/ioport					\
-	asf/sam/drivers/pmc							\
-	asf/sam/drivers/pio							\
-	asf/sam/drivers/uart					    \
-	asf/sam/drivers/usart					    \
-	asf/sam/drivers/dacc					    \
-	asf/sam/drivers/tc						    \
+	src												\
+	lib/ASF/sam/boards								\
+	lib/ASF/sam/utils								\
+	lib/ASF/sam/utils/header_files					\
+	lib/ASF/sam/utils/preprocessor					\
+	lib/ASF/sam/utils/cmsis/sam3x/include			\
+	lib/ASF/sam/utils/cmsis/sam3x/source/templates	\
+	lib/ASF/common/boards							\
+	lib/ASF/common/utils							\
+	lib/ASF/thirdparty/CMSIS/include				\
+	lib/ASF/common/services/gpio					\
+	lib/ASF/common/services/clock					\
+	lib/ASF/common/services/delay					\
+	lib/ASF/common/services/ioport					\
+	lib/ASF/sam/drivers/pmc							\
+	lib/ASF/sam/drivers/pio							\
+	lib/ASF/sam/drivers/uart					    \
+	lib/ASF/sam/drivers/usart					    \
+	lib/ASF/sam/drivers/dacc					    \
+	lib/ASF/sam/drivers/tc						    \
 
 
 
@@ -104,12 +105,12 @@ LIB_PATH =  \
 LIBS =  \
 
 # Path relative to top level directory pointing to a linker script.
-LINKER_SCRIPT_FLASH = asf/sam/utils/linker_scripts/sam3x/sam3x8/gcc/flash.ld
-LINKER_SCRIPT_SRAM  = asf/sam/utils/linker_scripts/sam3x/sam3x8/gcc/sram.ld
+LINKER_SCRIPT_FLASH = lib/ASF/sam/utils/linker_scripts/sam3x/sam3x8/gcc/flash.ld
+LINKER_SCRIPT_SRAM  = lib/ASF/sam/utils/linker_scripts/sam3x/sam3x8/gcc/sram.ld
 
 # Path relative to top level directory pointing to a linker script.
-DEBUG_SCRIPT_FLASH = asf/sam/boards/arduino_due_x/debug_scripts/gcc/arduino_due_x_flash.gdb
-DEBUG_SCRIPT_SRAM  = asf/sam/boards/arduino_due_x/debug_scripts/gcc/arduino_due_x_sram.gdb
+DEBUG_SCRIPT_FLASH = lib/ASF/sam/boards/arduino_due_x/debug_scripts/gcc/arduino_due_x_flash.gdb
+DEBUG_SCRIPT_SRAM  = lib/ASF/sam/boards/arduino_due_x/debug_scripts/gcc/arduino_due_x_sram.gdb
 
 # Project type parameter: all, sram or flash
 PROJECT_TYPE = flash

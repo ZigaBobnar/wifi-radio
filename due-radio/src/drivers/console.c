@@ -38,7 +38,7 @@ void console_enable() {
 	UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
 }
 
-
+/*
 void console_process_input() {
     if (console_rx_line_ready > 0) {
         char* input_line = calloc(128, sizeof(char));
@@ -80,7 +80,7 @@ void console_process_input() {
         free(input_line);
     }
 }
-
+*/
 
 void console_put_char(uint8_t value) {
     while (!(UART->UART_SR & UART_SR_TXRDY)) {}

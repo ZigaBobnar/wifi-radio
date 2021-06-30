@@ -97,9 +97,9 @@ bool esp_module_wifi_connect(const char *ssid, const char *password)
 
         console_put_line("ESP> Module wifi connect failed. Incorrect response.");
         free(response);
-
-        return false;
     }
+
+    return false;
 }
 
 void esp_module_play_next()
@@ -136,7 +136,7 @@ currently_playing_info *esp_module_get_currently_playing()
         {
             console_put_line("ESP> Received currently playing track information.");
 
-            if (!strlen(response) > 11 || response[3] != 'P' || response[4] != 'L' || response[5] != 'A' || response[6] != 'Y' || response[7] != 'I' || response[8] != 'N' || response[9] != 'G' || response[10] != ' ')
+            if (!(strlen(response) > 11) || response[3] != 'P' || response[4] != 'L' || response[5] != 'A' || response[6] != 'Y' || response[7] != 'I' || response[8] != 'N' || response[9] != 'G' || response[10] != ' ')
             {
                 console_put_line("ESP> Track is stopped.");
                 /*"OK STOPPED"*/
@@ -201,9 +201,9 @@ currently_playing_info *esp_module_get_currently_playing()
 
         console_put_formatted("ESP> Querying currently playing track failed. Incorrect response %s.", response);
         free(response);
-
-        return NULL;
     }
+
+    return NULL;
 }
 
 track_info *esp_module_get_track_info(int track_id)
@@ -387,6 +387,8 @@ current_time *esp_module_get_current_time()
 
         return result;
     }
+
+    return NULL;
 }
 
 /*void esp_module_start_stream() {

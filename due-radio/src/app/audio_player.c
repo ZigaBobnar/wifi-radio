@@ -71,10 +71,10 @@ void TC0_Handler() {
 void audio_player_ensure_buffered(void) {
 	static int32_t last_refill = 0;
 
-	int32_t current_time = timeguard_get_time_ms();
+	int32_t current_time_ms = timeguard_get_time_ms();
 
-	if (audio_player_running && current_time - last_refill > 300 && audio_player_buffered_samples < 3000) {
-		last_refill = current_time;
+	if (audio_player_running && current_time_ms - last_refill > 300 && audio_player_buffered_samples < 3000) {
+		last_refill = current_time_ms;
 
         audio_player_fill_buffer();
     }

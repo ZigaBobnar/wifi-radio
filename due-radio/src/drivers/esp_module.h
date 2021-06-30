@@ -51,13 +51,13 @@ void esp_module_hardware_setup(void);
 bool esp_module_init(void);
 
 bool esp_module_wifi_connect(const char* ssid, const char* password);
-void esp_module_play_next();
-void esp_module_play_previous();
-currently_playing_info* esp_module_get_currently_playing();
+void esp_module_play_next(void);
+void esp_module_play_previous(void);
+currently_playing_info* esp_module_get_currently_playing(void);
 track_info* esp_module_get_track_info(int track_id);
 int esp_module_get_chunk(int track_id, int chunk_index);
-void esp_module_get_next_chunk();
-current_time* esp_module_get_current_time();
+void esp_module_get_next_chunk(void);
+current_time* esp_module_get_current_time(void);
 //void esp_module_start_stream(void);
 //void esp_module_stop_stream(void);
 

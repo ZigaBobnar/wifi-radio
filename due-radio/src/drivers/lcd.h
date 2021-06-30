@@ -109,7 +109,7 @@ void lcd_init(lcd_t* lcd);
 /**
 * Write contents of lcd_string to the display
 */
-void lcd_write_lcd_string();
+void lcd_write_lcd_string(void);
 
 /**
 * Write the value to the LCD as characters
@@ -145,17 +145,17 @@ void lcd_write_string_at_cursor(uint8_t* value, uint8_t length);
 /**
 * Blocking wait until the display has cleared busy status
 */
-void lcd_wait_busy_status();
+void lcd_wait_busy_status(void);
 
 /**
  * Clears the top row of the lcd
  */
-void lcd_clear_upper();
+void lcd_clear_upper(void);
 
 /**
  * Clears the bottom row of the lcd
  */
-void lcd_clear_lower();
+void lcd_clear_lower(void);
 
 
 /**
@@ -167,12 +167,12 @@ void lcd_clear_lower();
 /**
 * Sends the clear display command to the LCD
 */
-void lcd_command_clear_display();
+void lcd_command_clear_display(void);
 
 /**
 * Sends the return home comand to the LCD
 */
-void lcd_command_return_home();
+void lcd_command_return_home(void);
 
 /**
 * Sends set entry mode command to the LCD
@@ -223,7 +223,7 @@ void lcd_command_set_ddram_address(uint8_t address);
 * Sends the read busy flag command to the LCD
 * @returns Whether the display is busy or is ready to accept instructions
 */
-bool lcd_command_read_busy_flag();
+bool lcd_command_read_busy_flag(void);
 
 /**
 * Sends the data or DDRAM value to the LCD
@@ -235,7 +235,7 @@ void lcd_driver_data_write(uint8_t value);
 * Reads the data or DDRAM value from the LCD
 * @returns 8-bit data value
 */
-uint8_t lcd_driver_data_read();
+uint8_t lcd_driver_data_read(void);
 
 /**
 * Sends the raw data and sets appropriate pins for command/data operations
@@ -253,7 +253,7 @@ void lcd_driver_raw_data_pins_set(uint8_t value);
 /**
 * Sends a pulse (0, 1, 0) to the enable pin of LCD
 */
-void lcd_driver_pulse_enable_pin();
+void lcd_driver_pulse_enable_pin(void);
 
 __EXTERN_C_END
 

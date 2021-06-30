@@ -47,7 +47,7 @@
 #define CLK_PLL_H_INCLUDED
 
 #include "parts.h"
-#include "conf_clock.h"
+#include "config/conf_clock.h"
 
 #if SAM3S
 # include "sam3s/pll.h"
