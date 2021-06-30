@@ -44,6 +44,9 @@
 // From module: Part identification macros
 //#include <parts.h>
 
+// From module: RTC - Real Time Clock
+#include <rtc.h>
+
 // From module: SAM3X startup code
 //#include <exceptions.h>
 

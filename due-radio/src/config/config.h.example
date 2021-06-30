@@ -24,4 +24,15 @@
     "\n"
 
 
+#define LCD_RS_PIN PIO_PC12_IDX     /* Due pin 51, SAM3X8E pin PC12 */
+#define LCD_RW_PIN PIO_PC14_IDX     /* Due pin 49, SAM3X8E pin PC14 */
+#define LCD_ENABLE_PIN PIO_PC16_IDX /* Due pin 47, SAM3X8E pin PC16 */
+#define LCD_D4_PIN PIO_PC13_IDX     /* Due pin 50, SAM3X8E pin PC13 */
+#define LCD_D5_PIN PIO_PC15_IDX     /* Due pin 48, SAM3X8E pin PC15 */
+#define LCD_D6_PIN PIO_PC17_IDX     /* Due pin 46, SAM3X8E pin PC17 */
+#define LCD_D7_PIN PIO_PC19_IDX     /* Due pin 44, SAM3X8E pin PC19 */
+
+
+#define DAC_CHANNEL 1
+
 #endif  // CONFIG_CONFIG_H_

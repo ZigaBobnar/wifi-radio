@@ -61,6 +61,7 @@ CSRCS = \
 	lib/ASF/sam/utils/cmsis/sam3x/source/templates/gcc/startup_sam3x.c	\
 	lib/ASF/common/services/clock/sam3x/sysclk.c						\
 	lib/ASF/common/services/delay/sam/cycle_counter.c					\
+	lib/ASF/common/services/calendar/calendar.c							\
 	lib/ASF/sam/utils/syscalls/gcc/syscalls.c                          	\
 	lib/ASF/sam/drivers/pmc/pmc.c										\
 	lib/ASF/sam/drivers/pio/pio.c										\
@@ -68,6 +69,7 @@ CSRCS = \
 	lib/ASF/sam/drivers/usart/usart.c									\
 	lib/ASF/sam/drivers/dacc/dacc.c									    \
 	lib/ASF/sam/drivers/tc/tc.c									    	\
+	lib/ASF/sam/drivers/rtc/rtc.c									    \
 
 
 # List of assembler source files.
@@ -89,12 +91,14 @@ INC_PATH = \
 	lib/ASF/common/services/clock					\
 	lib/ASF/common/services/delay					\
 	lib/ASF/common/services/ioport					\
+	lib/ASF/common/services/calendar				\
 	lib/ASF/sam/drivers/pmc							\
 	lib/ASF/sam/drivers/pio							\
 	lib/ASF/sam/drivers/uart					    \
 	lib/ASF/sam/drivers/usart					    \
 	lib/ASF/sam/drivers/dacc					    \
 	lib/ASF/sam/drivers/tc						    \
+	lib/ASF/sam/drivers/rtc						    \
 
 
 
