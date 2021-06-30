@@ -3,7 +3,7 @@
 
 __EXTERN_C_BEGIN
 
-dac_t* g_dac;
+volatile dac_t* g_dac;
 
 void dac_init(dac_t* dac) {
 	g_dac = dac;
@@ -27,7 +27,7 @@ bool dac_tx_ready() {
 }
 
 void dac_write(uint32_t value) {
-	dacc_write_conversion_data(DACC, ((uint32_t)value) * 10);
+	dacc_write_conversion_data(DACC, ((uint32_t)value));
 }
 
 /*

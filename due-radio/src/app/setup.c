@@ -1,4 +1,5 @@
 #include "app/setup.h"
+#include "app/runtime.h"
 #include "drivers/lcd.h"
 #include "drivers/dac.h"
 #include "drivers/esp_module.h"
@@ -8,27 +9,6 @@
 #include "app/audio_player.h"
 
 __EXTERN_C_BEGIN
-
-lcd_t g_lcd_instance = {
-    .rs = PIO_PC12_IDX,     // Due pin 51, 	SAM3X8E pin PC12
-    .rw = PIO_PC14_IDX,     // Due pin 49,	SAM3X8E pin PC14
-    .enable = PIO_PC16_IDX, // Due pin 47	SAM3X8E pin PC16
-
-    .d4 = PIO_PC13_IDX, // Due pin 50,	SAM3X8E pin PC13
-    .d5 = PIO_PC15_IDX, // Due pin 48,	SAM3X8E pin PC15
-    .d6 = PIO_PC17_IDX, // Due pin 46,	SAM3X8E pin PC17
-    .d7 = PIO_PC19_IDX, // Due pin 44,	SAM3X8E pin PC19
-
-    .__lcd_buffer = "                                ",
-};
-
-dac_t g_dac_instance = {
-    .channel = 1,
-    // .max_value = DACC_MAX_DATA,
-    // .min_value = 100,
-    // .sampling_frequency = 16000,
-    // .get_next_sample_function = NULL,
-};
 
 bool setup_begin(void) {
     int32_t boot_start_time = timeguard_get_time_ms();
@@ -94,7 +74,7 @@ bool setup_hardware(void) {
 }
 
 bool setup_lcd(void) {
-    lcd_init(&g_lcd_instance);
+    lcd_init(runtime->lcd);
 
     lcd_clear_upper();
     lcd_clear_lower();
@@ -130,7 +110,7 @@ bool setup_dac(void) {
     lcd_write_lower_formatted("DAC...");
     console_put_line(" => [DAC]");
 
-    dac_init(&g_dac_instance);
+    dac_init(runtime->dac);
     dac_write(0);
 
     lcd_write_lower_formatted("DAC OK");

@@ -5,7 +5,7 @@
 
 __EXTERN_C_BEGIN
 
-lcd_t* g_lcd;
+volatile lcd_t* g_lcd;
 
 /**
  *
@@ -15,10 +15,6 @@ lcd_t* g_lcd;
 
 void lcd_init(lcd_t* lcd) {
     g_lcd = lcd;
-
-    g_lcd->_lcd_string = g_lcd->__lcd_buffer;
-    g_lcd->lcd_upper = g_lcd->__lcd_buffer;
-    g_lcd->lcd_lower = g_lcd->__lcd_buffer + 16;
 
     ioport_init();
 

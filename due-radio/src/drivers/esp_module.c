@@ -1,6 +1,7 @@
 #include "drivers/esp_module.h"
 #include <string.h>
 #include <stdarg.h>
+#include "app/runtime.h"
 #include "drivers/console.h"
 #include "utils/timeguard.h"
 #include "app/audio_player.h"
@@ -282,7 +283,7 @@ int esp_module_get_chunk(int track_id, int chunk_index)
 {
     console_put_formatted("ESP> Retrieving chunk %i for track id: %i", chunk_index, track_id);
 
-    audio_player_buffering = true;
+    runtime->player->is_buffering = true;
 
     esp_module_clear_status();
     esp_module_tx_put_formatted("get_chunk %i %i", track_id, chunk_index);
@@ -345,7 +346,7 @@ void esp_module_get_next_chunk()
 {
     console_put_formatted("ESP> Retrieving next chunk");
 
-    audio_player_buffering = true;
+    runtime->player->is_buffering = true;
 
     esp_module_clear_status();
     esp_module_tx_put_formatted("get_next_chunk");
@@ -565,7 +566,7 @@ void USART0_Handler()
     {
         uint8_t recv = USART0->US_RHR;
 
-        if (!audio_player_buffering) {
+        if (!runtime->player->is_buffering) {
             fifo_write_single(&esp_rx_fifo, recv);
 
             if (recv != '\n') {
@@ -580,8 +581,8 @@ void USART0_Handler()
                 memset(line_buff, 0, sizeof(line_buff));
             }
         } else {
-            fifo_write_single(audio_player_buffer, recv);
-            audio_player_buffered_samples++;
+            fifo_write_single(runtime->player->buffer_fifo, recv);
+            runtime->player->buffered_samples++;
             //audio_player_buffering_samples_left--;
 
             // if (audio_player_buffering_samples_left < 0) {

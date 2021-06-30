@@ -1,13 +1,14 @@
 #include "drivers/buttons.h"
+#include "app/runtime.h"
 
 __EXTERN_C_BEGIN
 
-uint32_t g_buttons_state = 0;
-uint32_t g_buttons_rising = 0;
-uint32_t g_buttons_falling = 0;
+volatile buttons_runtime_t* g_buttons;
 
 void buttons_init()
 {
+	g_buttons = runtime->buttons;
+
 	ioport_init();
 
 	ioport_enable_pin(PIO_PC26_IDX);
@@ -23,28 +24,29 @@ void buttons_init()
 
 void buttons_read()
 {
-	uint32_t state =
+	uint8_t state =
 		(!ioport_get_pin_level(PIO_PC26_IDX) << 3) |
 		(!ioport_get_pin_level(PIO_PC25_IDX) << 2) |
 		(!ioport_get_pin_level(PIO_PC24_IDX) << 1) |
 		(!ioport_get_pin_level(PIO_PC23_IDX) << 0);
 
-	g_buttons_rising = ~g_buttons_state & state;
-	g_buttons_falling = g_buttons_state & ~state;
+	uint8_t old_state = g_buttons->state;
+	g_buttons->rising = ~old_state & state;
+	g_buttons->falling = old_state & ~state;
 
-	g_buttons_state = state;
+	g_buttons->state = state;
 }
 
 bool button_pressed(int button) {
-	return g_buttons_rising & (1 << button);
+	return g_buttons->rising & (1 << button);
 }
 
 bool button_released(int button) {
-	return g_buttons_falling & (1 << button);
+	return g_buttons->falling & (1 << button);
 }
 
 bool button_state(int button) {
-	return g_buttons_state & (1 << button);
+	return g_buttons->state & (1 << button);
 }
 
 __EXTERN_C_END

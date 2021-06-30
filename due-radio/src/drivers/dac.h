@@ -10,19 +10,21 @@
  * This interface uses hardware DACC.
  */
 
+#if !defined(DAC_CHANNEL)
+#error DAC configuration must be fully defined.
+#endif
+
 #define DACC_ANALOG_CONTROL (DACC_ACR_IBCTLCH0(0x02) \
 	| DACC_ACR_IBCTLCH1(0x02) \
 	| DACC_ACR_IBCTLDACCORE(0x01))
 
 __EXTERN_C_BEGIN
 
-// typedef uint32_t (*ptr_get_next_sample_function)();
-
 struct _dac {
 	uint32_t channel;
-	uint32_t max_value;
+	/*uint32_t max_value;
 	uint32_t min_value;
-	uint32_t sampling_frequency;
+	uint32_t sampling_frequency;*/
 	// ptr_get_next_sample_function get_next_sample_function;
 };
 typedef struct _dac dac_t;

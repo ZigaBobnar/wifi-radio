@@ -1,4 +1,5 @@
 #include "app/ui.h"
+#include "runtime.h"
 #include "drivers/buttons.h"
 #include "drivers/lcd.h"
 #include "utils/timeguard.h"
@@ -6,8 +7,8 @@
 
 __EXTERN_C_BEGIN
 
-ui_state g_state;
-bool g_state_dirty = true;
+// ui_state g_state;
+// bool g_state_dirty = true;
 int32_t g_current_time_ms;
 int32_t g_year, g_month, g_day;
 
@@ -20,29 +21,30 @@ void ui_run() {
     ui_update_current_time();
     buttons_read();
 
-    if (g_state == UI_STATE_LOADING) {
+    ui_state state = ui_get_state();
+    if (state == UI_STATE_LOADING) {
         // UI frozen
-    } else if (g_state == UI_STATE_CLOCK) {
+    } else if (state == UI_STATE_CLOCK) {
         // UI updating clock in correct intervals and handling start playback
         // presses
 
-        if (g_state_dirty) {
+        if (runtime->ui->state_switched_dirty) {
             lcd_clear_upper();
             lcd_clear_lower();
             lcd_write_lcd_string();
         }
 
-        ui_lcd_display_current_time(g_state_dirty);
+        ui_lcd_display_current_time(runtime->ui->state_switched_dirty);
 
-        g_state_dirty = false;
+        runtime->ui->state_switched_dirty = false;
 
         if (button_released(0)) {
             ui_set_state(UI_STATE_PLAYING);
         }
-    } else if (g_state == UI_STATE_PLAYING) {
+    } else if (state == UI_STATE_PLAYING) {
         // UI displaying playback info and handling playback commands
 
-        if (g_state_dirty) {
+        if (runtime->ui->state_switched_dirty) {
             lcd_clear_upper();
             lcd_clear_lower();
             lcd_write_lcd_string();
@@ -50,16 +52,16 @@ void ui_run() {
             audio_player_start();
         }
 
-        ui_lcd_display_playback_info(g_state_dirty);
+        ui_lcd_display_playback_info(runtime->ui->state_switched_dirty);
 
-        g_state_dirty = false;
+        runtime->ui->state_switched_dirty = false;
 
         if (button_released(0)) {
             audio_player_stop();
 
             ui_set_state(UI_STATE_CLOCK);
         }
-    } else if (g_state == UI_STATE_ERROR) {
+    } else if (state == UI_STATE_ERROR) {
         // UI frozen
     } else {
 
@@ -76,12 +78,12 @@ void ui_run() {
 }
 
 void ui_set_state(ui_state state) {
-    g_state = state;
-    g_state_dirty = true;
+    runtime->ui->state = state;
+    runtime->ui->state_switched_dirty = true;
 }
 
 ui_state ui_get_state() {
-    return g_state;
+    return runtime->ui->state;
 }
 
 void ui_update_current_time() {

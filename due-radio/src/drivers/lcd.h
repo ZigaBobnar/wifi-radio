@@ -20,6 +20,10 @@
 
 #include "common.h"
 
+#if !defined(LCD_RS_PIN) || !defined(LCD_RW_PIN) || !defined(LCD_ENABLE_PIN) || !defined(LCD_D4_PIN) || !defined(LCD_D5_PIN) || !defined(LCD_D6_PIN) || !defined(LCD_D7_PIN)
+#error LCD connection configuration must be fully defined.
+#endif
+
 __EXTERN_C_BEGIN
 
 /**
@@ -88,7 +92,6 @@ struct _lcd {
 	uint32_t d6;
 	uint32_t d7;
 
-	char __lcd_buffer[33];
 	char* _lcd_string;
 	char* lcd_upper;
 	char* lcd_lower;
