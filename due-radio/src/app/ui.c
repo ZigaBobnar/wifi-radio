@@ -2,15 +2,12 @@
 #include "runtime.h"
 #include "drivers/buttons.h"
 #include "drivers/lcd.h"
+#include "drivers/clock.h"
 #include "utils/timeguard.h"
+#include "utils/system.h"
 #include "app/audio_player.h"
 
 __EXTERN_C_BEGIN
-
-// ui_state g_state;
-// bool g_state_dirty = true;
-int32_t g_current_time_ms;
-int32_t g_year, g_month, g_day;
 
 void ui_init() {
     ui_set_state(UI_STATE_LOADING);
@@ -27,53 +24,20 @@ void ui_run() {
     } else if (state == UI_STATE_CLOCK) {
         // UI updating clock in correct intervals and handling start playback
         // presses
-
-        if (runtime->ui->state_switched_dirty) {
-            lcd_clear_upper();
-            lcd_clear_lower();
-            lcd_write_lcd_string();
-        }
-
-        ui_lcd_display_current_time(runtime->ui->state_switched_dirty);
-
-        runtime->ui->state_switched_dirty = false;
-
-        if (button_released(0)) {
-            ui_set_state(UI_STATE_PLAYING);
-        }
+        ui_process_state_clock();
     } else if (state == UI_STATE_PLAYING) {
         // UI displaying playback info and handling playback commands
-
-        if (runtime->ui->state_switched_dirty) {
-            lcd_clear_upper();
-            lcd_clear_lower();
-            lcd_write_lcd_string();
-
-            audio_player_start();
-        }
-
-        ui_lcd_display_playback_info(runtime->ui->state_switched_dirty);
-
-        runtime->ui->state_switched_dirty = false;
-
-        if (button_released(0)) {
-            audio_player_stop();
-
-            ui_set_state(UI_STATE_CLOCK);
-        }
+        ui_process_state_playing();
     } else if (state == UI_STATE_ERROR) {
-        // UI frozen
+        // UI must stay frozen
     } else {
-
+        // Unknown UI state
     }
 
-    // Reset the system if buttons 1 and 3 are pressed for more than 3 seconds.
+    // Reset the system if button 1 is released while buttons 2 and 3 are pressed.
 	if (button_released(0) && button_state(1) & 1 && button_state(2) & 1)
 	{
-        __DSB;
-        SCB->AIRCR = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
-        RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
-        NVIC_SystemReset();
+        system_restart();
 	}
 }
 
@@ -86,32 +50,44 @@ ui_state ui_get_state() {
     return runtime->ui->state;
 }
 
-void ui_update_current_time() {
-    static int32_t last_timeguard_time = 0;
 
-    int32_t new_timeguard_time = timeguard_get_time_ms();
-
-    g_current_time_ms += (new_timeguard_time - last_timeguard_time);
-
-    if (g_current_time_ms >= 1000 * 60 * 60 * 24) {
-        g_current_time_ms = 0;
+void ui_process_state_clock() {
+    if (runtime->ui->state_switched_dirty) {
+        ui_lcd_cleanup();
     }
 
-    last_timeguard_time = new_timeguard_time;
+    ui_lcd_display_current_time(runtime->ui->state_switched_dirty);
+
+    runtime->ui->state_switched_dirty = false;
+
+    if (button_released(0)) {
+        ui_set_state(UI_STATE_PLAYING);
+    }
 }
 
-int32_t ui_get_current_time_ms() {
-    return g_current_time_ms;
+void ui_process_state_playing() {
+    if (runtime->ui->state_switched_dirty) {
+        ui_lcd_cleanup();
+
+        audio_player_start();
+    }
+
+    ui_lcd_display_playback_info(runtime->ui->state_switched_dirty);
+
+    runtime->ui->state_switched_dirty = false;
+
+    if (button_released(0)) {
+        audio_player_stop();
+
+        ui_set_state(UI_STATE_CLOCK);
+    }
 }
 
-void ui_set_current_time_ms(int32_t current_time_ms) {
-    g_current_time_ms = current_time_ms;
-}
 
-void ui_set_current_date(int32_t year, int32_t month, int32_t day) {
-    g_year = year;
-    g_month = month;
-    g_day = day;
+void ui_lcd_cleanup() {
+    lcd_clear_upper();
+    lcd_clear_lower();
+    lcd_write_lcd_string();
 }
 
 void ui_lcd_display_current_time(bool force_update) {
@@ -119,37 +95,35 @@ void ui_lcd_display_current_time(bool force_update) {
     static bool showing_date = false;
     static int32_t last_date_switch = 0;
 
-    int32_t current_time = ui_get_current_time_ms();
-
+    int32_t timeguard_time = timeguard_get_time_ms();
     if (force_update) {
-        last_time = current_time;
-        last_date_switch = current_time;
+        last_time = timeguard_time;
+        last_date_switch = timeguard_time;
         showing_date = false;
     }
 
-    if (force_update || current_time - last_time > 150) {
-        int hours = current_time / (1000 * 60 * 60);
-        int minutes = current_time / (1000 * 60) - hours * 60;
-        int seconds = current_time / 1000 - hours * 60 * 60 - minutes * 60;
-
+    if (force_update || timeguard_time - last_time > 150) {
+        uint8_t hours, minutes, seconds;
+        clock_get_time(&hours, &minutes, &seconds);
+        
         if (seconds % 2) {
             lcd_write_upper_formatted("    %02i:%02i:%02i    ", hours, minutes, seconds);
         } else {
             lcd_write_upper_formatted("    %02i %02i %02i    ", hours, minutes, seconds);
         }
 
-        if (!force_update && current_time - last_date_switch > 5000) {
+        if (!force_update && timeguard_time - last_date_switch > 5000) {
             showing_date = !showing_date;
-            last_date_switch = current_time;
+            last_date_switch = timeguard_time;
         }
 
-        if (!showing_date) {
+        //if (!showing_date) {
             lcd_write_lower_formatted("Press |> to play");
-        } else {
+        /*} else {
             lcd_write_lower_formatted("   %02i.%02i.%i   ", g_day, g_month, g_year);
-        }
+        }*/
 
-        last_time = current_time;
+        last_time = timeguard_time;
     }
 }
 
@@ -157,28 +131,27 @@ void ui_lcd_display_playback_info(bool force_update) {
     static int32_t last_switch_time = 0;
     static bool showing_clock = false;
 
-    int32_t current_time = ui_get_current_time_ms();
+    int32_t timeguard_time = timeguard_get_time_ms();
 
     if (force_update) {
-        last_switch_time = current_time;
+        last_switch_time = timeguard_time;
         showing_clock = false;
     }
 
-    if (current_time - last_switch_time > 5000) {
-        last_switch_time = current_time;
+    if (timeguard_time - last_switch_time > 5000) {
+        last_switch_time = timeguard_time;
         showing_clock = !showing_clock;
         force_update = true;
     }
 
-    if (force_update || current_time - last_switch_time > 150) {
+    if (force_update || timeguard_time - last_switch_time > 150) {
         if (!showing_clock) {
             lcd_write_upper_formatted("Playing...      ");
             lcd_write_lower_formatted("Press || to stop");
         } else {
-            int hours = current_time / (1000 * 60 * 60);
-            int minutes = current_time / (1000 * 60) - hours * 60;
-            int seconds = current_time / 1000 - hours * 60 * 60 - minutes * 60;
-
+            uint8_t hours, minutes, seconds;
+            clock_get_time(&hours, &minutes, &seconds);
+            
             if (seconds % 2) {
                 lcd_write_upper_formatted("    %02i:%02i:%02i    ", hours, minutes, seconds);
             } else {

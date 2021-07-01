@@ -28,13 +28,23 @@ typedef struct _ui_runtime {
     volatile bool state_switched_dirty;
 } ui_runtime_t;
 
+typedef struct _clock_runtime {
+    volatile uint16_t year;
+    volatile uint8_t month;
+    volatile uint8_t day;
+    volatile uint8_t hour;
+    volatile uint8_t minute;
+    volatile uint8_t second;
+    volatile bool clock_dirty;
+} clock_runtime_t;
+
 typedef struct _app_runtime {
     lcd_t* lcd;
     dac_t* dac;
     audio_player_runtime_t* player;
     buttons_runtime_t* buttons;
     ui_runtime_t* ui;
-    // TODO: Use ASF RTC and calendar implementations.
+    clock_runtime_t* clock;
 } app_runtime_t;
 
 extern app_runtime_t* runtime;

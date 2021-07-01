@@ -56,6 +56,11 @@ int32_t timeguard_get_time_s(void);
  */
 int32_t timeguard_get_diff_s(int32_t previous_time_s);
 
+/**
+ * Checks whether the timeout in milliseconds has been reached.
+ */
+bool timeguard_timeout_ms(int32_t start_time_ms, int32_t timeout_ms);
+
 __EXTERN_C_END
 
 #endif  // UTILS_TIMEGUARD_H_

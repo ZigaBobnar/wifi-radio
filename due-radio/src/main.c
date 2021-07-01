@@ -8,16 +8,14 @@
 #include "app/audio_player.h"
 #include "app/ui.h"
 #include "app/setup.h"
-
 #include <time.h>
 
 __EXTERN_C_BEGIN
 
-bool boot_setup(void);
-void main_loop(void);
+bool system_setup(void);
+void system_main_loop(void);
 
-int main(void)
-{
+int main(void) {
     /* sets the processor clock according to conf_clock.h definitions */
     sysclk_init();
 
@@ -26,22 +24,22 @@ int main(void)
 
     /*****************************   HW init     *****************************/
     bool setup_successful = setup_begin();
-    if (setup_successful)
-    {
+    if (setup_successful) {
         // Initialization has succeeded.
         ui_set_state(UI_STATE_CLOCK);
-        /***************************   Main loop   ***************************/
 
-        while (1)
-        {
-            main_loop();
+        /***************************   Main loop   ***************************/
+        while (1) {
+            system_main_loop();
         }
-    }
-    else
-    {
+    } else {
         ui_set_state(UI_STATE_ERROR);
         // Boot has failed, abort.
-        delay_ms(3000);
+        int32_t delay_start_time = timeguard_get_time_ms();
+        while (!timeguard_timeout_ms(delay_start_time, 3000)) {
+            ui_run();
+        }
+
         lcd_write_upper_formatted("Boot setup fail");
         lcd_write_lower_formatted("Cannot continue");
 
@@ -52,7 +50,10 @@ int main(void)
         console_put_line(CONSOLE_VT100_COLOR_TEXT_RED
                          "Resetting in 10 seconds." CONSOLE_VT100_COLOR_TEXT_DEFAULT);
 
-        delay_ms(10000);
+        delay_start_time = timeguard_get_time_ms();
+        while (!timeguard_timeout_ms(delay_start_time, 10000)) {
+            ui_run();
+        }
 
         __DSB;
         SCB->AIRCR = ((0x5FA << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
@@ -60,22 +61,16 @@ int main(void)
         NVIC_SystemReset();
 #endif
 
-        while (1)
-        {
+        while (1) {
             ui_run();
         }
     }
 
-    while (1)
-    {
-    }
+    while (1) {}
 }
 
-void main_loop()
-{
+void system_main_loop() {
     ui_run();
-    // console_process_input();
-
     audio_player_ensure_buffered();
 }
 

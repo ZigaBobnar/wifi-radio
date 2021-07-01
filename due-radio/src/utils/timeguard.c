@@ -34,4 +34,8 @@ int32_t timeguard_get_diff_s(int32_t previous_time_s) {
     return timeguard_get_time_s() - previous_time_s;
 }
 
+bool timeguard_timeout_ms(int32_t start_time_ms, int32_t timeout_ms) {
+    return (timeguard_get_time_ms() - start_time_ms) >= timeout_ms;
+}
+
 __EXTERN_C_END

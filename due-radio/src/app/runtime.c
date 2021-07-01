@@ -60,6 +60,19 @@ static ui_runtime_t ui_runtime_instance = {
 };
 
 //
+// Clock
+//
+static clock_runtime_t clock_runtime_instance = {
+    .year = 1970,
+    .month = 0,
+    .day = 0,
+    .hour = 0,
+    .minute = 0,
+    .second = 0,
+    .clock_dirty = true,
+};
+
+//
 // Runtime
 //
 static app_runtime_t runtime_instance = {
@@ -68,6 +81,7 @@ static app_runtime_t runtime_instance = {
     .player = &audio_player_runtime_instance,
     .buttons = &buttons_runtime_instance,
     .ui = &ui_runtime_instance,
+    .clock = &clock_runtime_instance,
 };
 
 __EXTERN_C_BEGIN

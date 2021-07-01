@@ -2,6 +2,7 @@
 #include "app/runtime.h"
 #include "drivers/lcd.h"
 #include "drivers/dac.h"
+#include "drivers/clock.h"
 #include "drivers/esp_module.h"
 #include "drivers/console.h"
 #include "utils/timeguard.h"
@@ -69,6 +70,7 @@ bool setup_hardware(void) {
     ioport_init();
     timeguard_init();
     ui_init();
+    clock_init(); // Custom RTC clock driver
 
     return true;
 }
@@ -184,12 +186,13 @@ bool setup_timesync(void) {
     }
     else
     {
-        ui_update_current_time();
-        ui_set_current_time_ms((c_time->hour * 60 * 60 + c_time->minutes * 60 + c_time->seconds) * 1000);        
-        ui_set_current_date(c_time->year, c_time->month, c_time->day);
+        clock_set_time(c_time->hour, c_time->minutes, c_time->seconds);
+        //ui_update_current_time();
+        //ui_set_current_time_ms((c_time->hour * 60 * 60 + c_time->minutes * 60 + c_time->seconds) * 1000);        
+        //ui_set_current_date(c_time->year, c_time->month, c_time->day);
 
         console_put_formatted("\t  Time synced, %i-%i-%i %i:%i:%i", c_time->year, c_time->month, c_time->day, c_time->hour, c_time->minutes, c_time->seconds);
-        console_put_formatted("\t  UI time: %i ms", ui_get_current_time_ms());
+        // console_put_formatted("\t  UI time: %i ms", ui_get_current_time_ms());
 
         free(c_time);
     }
