@@ -15,7 +15,8 @@ void ui_init() {
 }
 
 void ui_run() {
-    ui_update_current_time();
+	// TODO
+    // ui_update_current_time();
     buttons_read();
 
     ui_state state = ui_get_state();
@@ -105,7 +106,7 @@ void ui_lcd_display_current_time(bool force_update) {
     if (force_update || timeguard_time - last_time > 150) {
         uint8_t hours, minutes, seconds;
         clock_get_time(&hours, &minutes, &seconds);
-        
+
         if (seconds % 2) {
             lcd_write_upper_formatted("    %02i:%02i:%02i    ", hours, minutes, seconds);
         } else {
@@ -151,7 +152,7 @@ void ui_lcd_display_playback_info(bool force_update) {
         } else {
             uint8_t hours, minutes, seconds;
             clock_get_time(&hours, &minutes, &seconds);
-            
+
             if (seconds % 2) {
                 lcd_write_upper_formatted("    %02i:%02i:%02i    ", hours, minutes, seconds);
             } else {

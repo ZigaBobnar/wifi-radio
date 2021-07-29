@@ -19,6 +19,7 @@ cscope.out
 *.map
 *.layout
 *.depend
+[bB]uild/
 
 
 # User-specific files

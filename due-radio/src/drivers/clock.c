@@ -14,7 +14,7 @@ void clock_set_time(uint8_t hours, uint8_t minutes, uint8_t seconds) {
     rtc_set_time(RTC, hours, minutes, seconds);
 }
 
-void clock_get_date(uint16_t* year, uint8_t* month, uint8_t* day) {
+/*void clock_get_date(uint16_t* year, uint8_t* month, uint8_t* day) {
     if (runtime->clock->clock_dirty) {
         clock_update_from_rtc();
     }
@@ -22,7 +22,7 @@ void clock_get_date(uint16_t* year, uint8_t* month, uint8_t* day) {
     *year = runtime->clock->year;
     *month = runtime->clock->month;
     *day = runtime->clock->day;
-}
+}*/
 
 void clock_get_time(uint8_t* hours, uint8_t* minutes, uint8_t* seconds) {
     if (runtime->clock->clock_dirty) {

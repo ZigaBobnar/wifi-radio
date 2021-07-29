@@ -3,9 +3,27 @@
 
 #include "common.h"
 
+#ifndef FIFO_ENABLE_VALIDITY_CHECKS
+#define FIFO_ENABLE_VALIDITY_CHECKS 1
+#endif  // FIFO_ENABLE_VALIDITY_CHECKS
+
+#ifndef FIFO_ERROR_ON_INVALID
+#define FIFO_ERROR_ON_INVALID 1
+#endif  // FIFO_ERROR_ON_INVALID
+
+#if FIFO_ENABLE_VALIDITY_CHECKS
+#if FIFO_ERROR_ON_INVALID
+#define FIFO_VALIDATE(fifo, msg) if (!fifo_valid(fifo)) { debug_assert(msg); debug_crash_shutdown(); }
+#else
+#define FIFO_VALIDATE(fifo, msg) if (!fifo_valid(fifo)) debug_assert(msg);
+#endif // FIFO_ERROR_ON_INVALID
+#else
+#define FIFO_VALIDATE(fifo, msg)
+#endif // FIFO_ENABLE_VALIDITY_CHECKS
+
 /**
  * FIFO (First In, First Out) buffer
- * 
+ *
  * Fifo cyclic buffer can be used whenewer a program needs to always append
  * data after the current position in memory without the need for infinite
  * memory size. The buffer can be read all the way to the most recently written
@@ -15,13 +33,34 @@
 
 __EXTERN_C_BEGIN
 
-struct _fifo {
-    uint32_t read_idx;
-    uint32_t write_idx;
-    uint32_t size;
-    uint8_t* buffer;
-};
-typedef struct _fifo fifo_t;
+/**
+ * Fifo structure
+ */
+typedef struct _fifo {
+    /** Current read pointer */
+    uint8_t* read_ptr;
+    /** Current write pointer */
+    uint8_t* write_ptr;
+
+    /** Pointer to the start of data buffer */
+    uint8_t* buffer_start;
+    /** Pointer to the end of data buffer */
+    uint8_t* buffer_end;
+} fifo_t;
+
+/**
+ * Initialize a new fifo structure with set buffer and return pointer to it.
+ * When done using the structure must be properly disposed by calling fifo_destroy.
+ * @param queue_size The size of fifo queue
+ * @returns Pointer to created fifo structure
+ */
+fifo_t* fifo_create(size_t queue_size);
+
+/**
+ * Destroy a fifo structure.
+ * @param fifo Fifo structure
+ */
+void fifo_destroy(fifo_t* fifo);
 
 /**
  * Read from fifo buffer
@@ -30,7 +69,15 @@ typedef struct _fifo fifo_t;
  * @param n Number of bytes to read from buffer
  * @returns Number of bytes that were read
  */
-uint32_t fifo_read(fifo_t* fifo, uint8_t* data_buffer, uint32_t n);
+size_t fifo_read(fifo_t* fifo, uint8_t* data_buffer, size_t n);
+
+/**
+ * Read single item from fifo buffer
+ * @param fifo Fifo buffer
+ * @param item_ptr Pointer to where the fifo data should be read
+ * @returns Whether the item was read
+ */
+bool fifo_read_single(fifo_t* fifo, uint8_t* item_ptr);
 
 /**
  * Peeks (reads without advancing read pointer) the fifo buffer
@@ -39,7 +86,38 @@ uint32_t fifo_read(fifo_t* fifo, uint8_t* data_buffer, uint32_t n);
  * @param n Number of bytes to read from buffer
  * @returns Number of bytes that were read
  */
-uint32_t fifo_peek(fifo_t* fifo, uint8_t* data_buffer, uint32_t n);
+size_t fifo_peek(fifo_t* fifo, uint8_t* data_buffer, size_t n);
+
+/**
+ * Peeks single item from fifo buffer
+ * @returns Whether the item was read
+ */
+bool fifo_peek_single(fifo_t* fifo, uint8_t* item_ptr);
+
+/**
+ * Write data into fifo buffer
+ * @param fifo Fifo buffer to write data to
+ * @param data_buffer_ptr Pointer to data that needs to be written into fifo buffer
+ * @param n Number of bytes to write to buffer
+ * @returns Number of bytes that were written
+ */
+size_t fifo_write(fifo_t* fifo, uint8_t* data_buffer_ptr, size_t n);
+
+/**
+ * Write single byte into buffer
+ * @param fifo Fifo buffer to write data to
+ * @param value Value that needs to be written into fifo buffer
+ * @returns Number of bytes that were written
+ */
+bool fifo_write_single(fifo_t* fifo, uint8_t value);
+
+/**
+ * Discard any unread data
+ * This will set the read and write pointers to the start of buffer in order to
+ * reset fifo
+ * @param fifo Fifo buffer to discard
+ */
+void fifo_reset(fifo_t* fifo);
 
 /**
  * Checks whether one more item is available to be read from fifo buffer
@@ -49,28 +127,25 @@ uint32_t fifo_peek(fifo_t* fifo, uint8_t* data_buffer, uint32_t n);
 bool fifo_has_next_item(fifo_t* fifo);
 
 /**
- * Write data into fifo buffer
- * @param fifo Fifo buffer to write data to
- * @param data_ptr Pointer to data that needs to be written into fifo buffer
- * @param n Number of bytes to write to buffer
- * @returns Number of bytes that were written
+ * Checks whether any data can be written to fifo
+ * @param fifo Fifo buffer
+ * @returns True if at least single item can be written to fifo
  */
-uint32_t fifo_write(fifo_t* fifo, uint8_t* data_ptr, uint32_t n);
+bool fifo_is_full(fifo_t* fifo);
 
 /**
- * Write single byte into buffer
- * @param fifo Fifo buffer to write data to
- * @param value Value that needs to be written into fifo buffer
- * @returns Number of bytes that were written
+ * Get the size of fifo
+ * @param fifo Fifo buffer
+ * @returns The size of fifo buffer
  */
-uint32_t fifo_write_single(fifo_t* fifo, uint8_t value);
+size_t fifo_size(fifo_t* fifo);
 
 /**
- * Discard any unread data
- * This will set the read and write indexes to zero to reset fifo
- * @param fifo Fifo buffer to discard
+ * Check the integrity of fifo buffer by validating that the pointers are in valid range
+ * @param fifo Fifo buffer
+ * @returns True if fifo is valid
  */
-void fifo_discard(fifo_t* fifo);
+bool fifo_valid(fifo_t* fifo);
 
 __EXTERN_C_END
 
