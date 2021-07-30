@@ -56,6 +56,8 @@ TARGET_SRAM = $(PN).elf
 CSRCS = \
 	$(wildcard src/*.c)													\
 	$(wildcard src/**/*.c)												\
+	$(wildcard lib/due-radio/*.c)										\
+	$(wildcard lib/due-radio/**/*.c)									\
 	lib/ASF/sam/utils/cmsis/sam3x/source/templates/system_sam3x.c		\
 	lib/ASF/sam/utils/cmsis/sam3x/source/templates/exceptions.c			\
 	lib/ASF/sam/utils/cmsis/sam3x/source/templates/gcc/startup_sam3x.c	\
@@ -78,6 +80,7 @@ ASSRCS =
 # List of include paths.
 INC_PATH = \
 	src												\
+	lib												\
 	lib/ASF/sam/boards								\
 	lib/ASF/sam/utils								\
 	lib/ASF/sam/utils/header_files					\

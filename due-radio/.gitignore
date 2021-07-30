@@ -20,7 +20,7 @@ cscope.out
 *.layout
 *.depend
 [bB]uild/
-
+out/
 
 # User-specific files
 *.rsuser
