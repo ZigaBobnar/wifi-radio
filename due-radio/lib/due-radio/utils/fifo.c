@@ -96,14 +96,14 @@ bool fifo_peek_single(fifo_t* fifo, uint8_t* item_ptr) {
 size_t fifo_write(fifo_t* fifo, uint8_t* data_buffer_ptr, size_t n) {
     FIFO_VALIDATE(fifo, "fifo_write", 0);
 
-    if (fifo_is_full(fifo)) {
+    if (fifo_is_full(fifo) || n == 0) {
         return 0;
     }
 
     size_t bytes_written = 0;
     uint8_t* data_ptr = data_buffer_ptr;
 
-    while (bytes_written < n && fifo->read_ptr != fifo->write_ptr) {
+    while (bytes_written < n && !fifo_is_full(fifo)) {
         *fifo->write_ptr = *data_ptr;
 
         if (fifo->write_ptr >= fifo->buffer_end) {
