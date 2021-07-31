@@ -5,3 +5,8 @@ add_library(unity STATIC
 target_include_directories(unity
     PUBLIC src/
 )
+
+target_compile_definitions(unity
+    PUBLIC
+        UNITY_OUTPUT_COLOR
+)

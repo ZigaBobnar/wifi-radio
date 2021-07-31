@@ -1,7 +1,7 @@
 #ifndef UTILS_FIFO_H_
 #define UTILS_FIFO_H_
 
-#include "common.h"
+#include "due-radio/common.h"
 
 #ifndef FIFO_ENABLE_VALIDITY_CHECKS
 #define FIFO_ENABLE_VALIDITY_CHECKS 1
@@ -13,12 +13,15 @@
 
 #if FIFO_ENABLE_VALIDITY_CHECKS
 #if FIFO_ERROR_ON_INVALID
-#define FIFO_VALIDATE(fifo, msg) if (!fifo_valid(fifo)) { debug_assert(msg); debug_crash_shutdown(); }
+#define FIFO_VALIDATE(fifo, msg, fail_return_value) if (!fifo_valid(fifo)) { debug_assert(msg); debug_crash_shutdown(); return fail_return_value; }
+#define FIFO_VALIDATE_VOID(fifo, msg) if (!fifo_valid(fifo)) { debug_assert(msg); debug_crash_shutdown(); return; }
 #else
-#define FIFO_VALIDATE(fifo, msg) if (!fifo_valid(fifo)) debug_assert(msg);
+#define FIFO_VALIDATE(fifo, msg, fail_return_value) if (!fifo_valid(fifo)) { debug_assert(msg); return fail_return_value; }
+#define FIFO_VALIDATE_VOID(fifo, msg) if (!fifo_valid(fifo)) { debug_assert(msg); return; }
 #endif // FIFO_ERROR_ON_INVALID
 #else
-#define FIFO_VALIDATE(fifo, msg)
+#define FIFO_VALIDATE(fifo, msg, fail_return_value)
+#define FIFO_VALIDATE_VOID(fifo, msg)
 #endif // FIFO_ENABLE_VALIDITY_CHECKS
 
 /**

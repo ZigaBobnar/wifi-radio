@@ -11,3 +11,5 @@ The tests are supposed to be cross-platform as there should be no platform depen
 To build the project and run the tests, create a directory `out/` in the root of this folder. Then `cd` into it and run `cmake ..`. This will prepare and configure the build environment. Then you can move back to root folder and run `test.bat` or `test.sh`, depending on your platform.
 
 You can also build and run separately by using `cmake --build ./out` and `./out/tests/bin/Debug/Tests` commands.
+
+If you are using Visual Studio Code, you can install CMake extension, which allows you to configure the project, build it and run or debug it. This way it is very easy to set breakpoints inside test cases and debug when something goes wrong.

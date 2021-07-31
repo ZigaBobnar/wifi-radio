@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src",
+                "${workspaceFolder}/lib",
                 "${workspaceFolder}/lib/ASF/sam/boards",
                 "${workspaceFolder}/lib/ASF/sam/utils",
                 "${workspaceFolder}/lib/ASF/sam/utils/header_files",
@@ -23,9 +24,7 @@
                 "${workspaceFolder}/lib/ASF/sam/drivers/uart",
                 "${workspaceFolder}/lib/ASF/sam/drivers/usart",
                 "${workspaceFolder}/lib/ASF/sam/drivers/dacc",
-                "${workspaceFolder}/lib/ASF/sam/drivers/tc",
-                "${vcpkgRoot}/x64-windows/include",
-                "${vcpkgRoot}/x86-windows/include"
+                "${workspaceFolder}/lib/ASF/sam/drivers/tc"
             ],
             "defines": [
                 "_DEBUG",
@@ -42,7 +41,8 @@
             "compilerPath": "D:/Active/ProgramFiles/Atmel/Studio/7.0/toolchain/arm/arm-gnu-toolchain/bin/arm-none-eabi-gcc.exe",
             "cStandard": "c11",
             "cppStandard": "c++11",
-            "intelliSenseMode": "linux-gcc-arm"
+            "intelliSenseMode": "linux-gcc-arm",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4
