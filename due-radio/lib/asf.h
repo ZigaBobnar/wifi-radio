@@ -71,5 +71,7 @@
 // From module: pio_handler support enabled
 //#include <pio_handler.h>
 
+// From module: DACC
+#include <dacc.h>
 
 #endif  // ASF_H_

@@ -1,20 +1,16 @@
-#include "drivers/console.h"
-#include <stdarg.h>
-#include "drivers/esp_module.h"
+#include "due-radio/drivers/console.h"
+#include "due-radio/drivers/esp_module.h"
 
 __EXTERN_C_BEGIN
 
-uint8_t console_rx_fifo_buff[CONSOLE_RX_QUEUE_SIZE];
-fifo_t console_rx_fifo = {
-    .read_idx    = 0,
-    .write_idx   = 0,
-    .size        = CONSOLE_RX_QUEUE_SIZE,
-    .buffer      = console_rx_fifo_buff,
-};
+fifo_t* console_rx_fifo;
 
 int console_rx_line_ready = 0;
 
 void console_init() {
+    console_rx_fifo = fifo_create(CONSOLE_RX_QUEUE_SIZE);
+
+#if REAL_HARDWARE
     sysclk_enable_peripheral_clock(ID_PIOA);
     pio_set_peripheral(PIOA, PIO_PERIPH_A, PINS_UART);
     pio_pull_up(PIOA, PINS_UART, PIO_PULLUP);
@@ -27,15 +23,18 @@ void console_init() {
     };
 
     uart_init(UART, &uart_opts);
+#endif
 }
 
 void console_enable() {
+#if REAL_HARDWARE
     UART->UART_CR = UART_CR_RSTSTA | UART_CR_RSTTX | UART_CR_RSTRX;
 
     UART->UART_IER = UART_IER_RXRDY;
     NVIC_EnableIRQ(UART_IRQn);
 
 	UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
+#endif
 }
 
 /*
@@ -83,18 +82,26 @@ void console_process_input() {
 */
 
 void console_put_char(uint8_t value) {
+#if REAL_HARDWARE
     while (!(UART->UART_SR & UART_SR_TXRDY)) {}
 
     UART->UART_THR = UART_THR_TXCHR(value);
+#else
+    printf("%c", value);
+#endif
 }
 
 void console_put_raw_string(const char* str) {
+#if REAL_HARDWARE
     const char* c = str;
 
     while (*c != 0) {
         console_put_char(*c);
         c++;
     }
+#else
+    printf(str);
+#endif
 }
 
 void console_put_line(const char* str) {
@@ -125,17 +132,17 @@ void console_put_formatted(const char* format, ...) {
 
 
 bool console_char_ready() {
-    return fifo_has_next_item(&console_rx_fifo);
+    return fifo_has_next_item(console_rx_fifo);
 }
 
 void console_wait_until_char_ready() {
-    while (!fifo_has_next_item(&console_rx_fifo)) {}
+    while (!fifo_has_next_item(console_rx_fifo)) {}
 }
 
 uint8_t console_get_char() {
     uint8_t buf;
 
-    fifo_read(&console_rx_fifo, &buf, 1);
+    fifo_read_single(console_rx_fifo, &buf);
 
     return buf;
 }
@@ -143,23 +150,25 @@ uint8_t console_get_char() {
 uint8_t console_peek_char() {
     uint8_t buf;
 
-    fifo_peek(&console_rx_fifo, &buf, 1);
+    fifo_peek_single(console_rx_fifo, &buf);
 
     return buf;
 }
 
 void UART_Handler() {
+#if REAL_HARDWARE
     // Handle RX situations by putting received bytes into fifo.
     if (UART->UART_IMR & UART_IMR_RXRDY) {
         uint8_t value = UART->UART_RHR;
 
         // TODO:
         //console_put_char(value); // Console echo
-        fifo_write_single(&console_rx_fifo, value);
+        fifo_write_single(console_rx_fifo, value);
         if (value == '\n') {
             console_rx_line_ready++;
         }
     }
+#endif
 }
 
 __EXTERN_C_END

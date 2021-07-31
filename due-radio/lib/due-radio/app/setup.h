@@ -1,7 +1,7 @@
 #ifndef APP_SETUP_H_
 #define APP_SETUP_H_
 
-#include "common.h"
+#include "due-radio/common.h"
 
 __EXTERN_C_BEGIN
 

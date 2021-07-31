@@ -1,12 +1,13 @@
 #ifndef APP_RUNTIME_H_
 #define APP_RUNTIME_H_
 
-#include "common.h"
-#include "drivers/lcd.h"
-#include "drivers/dac.h"
-#include "app/ui.h"
-#include "app/audio_player.h"
-#include "utils/fifo.h"
+#include "due-radio/common.h"
+#include "due-radio/utils/fifo.h"
+#include "due-radio/drivers/buttons.h"
+#include "due-radio/drivers/lcd.h"
+#include "due-radio/drivers/dac.h"
+#include "due-radio/app/ui.h"
+#include "due-radio/app/audio_player.h"
 
 __EXTERN_C_BEGIN
 

@@ -5,6 +5,7 @@
 
 
 src/config/config.h
+lib/due-radio/config/config.h
 cscope.out
 *.cscope_file_list
 

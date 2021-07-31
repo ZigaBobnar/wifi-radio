@@ -1,7 +1,10 @@
 #ifndef UTILS_TIMEGUARD_H_
 #define UTILS_TIMEGUARD_H_
 
-#include "common.h"
+#include "due-radio/common.h"
+#if REAL_HARDWARE
+#include <asf.h>
+#endif
 
 /**
  * TimeGuard
@@ -12,16 +15,20 @@
  * It uses hardware timer counter TC0, channel 1 as default.
  */
 
+#if REAL_HARDWARE
 #ifndef TIMEGUARD_CUSTOM_CONFIG
 #define TIMEGUARD_TCn TC0
 #define TIMEGUARD_CHANNEL (1)
 #define TIMEGUARD_ID_TCx ID_TC1
 #endif  // TIMEGUARD_CUSTOM_CONFIG
+#endif
 
 __EXTERN_C_BEGIN
 
+#if REAL_HARDWARE
 extern const int32_t time_unit_ms;
 extern const int32_t time_unit_s;
+#endif
 
 /**
  * Initializes TimeGuard with default settings.

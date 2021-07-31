@@ -1,6 +1,4 @@
-#include "drivers/lcd.h"
-#include <delay.h>
-#include <stdarg.h>
+#include "due-radio/drivers/lcd.h"
 #include <memory.h>
 
 __EXTERN_C_BEGIN
@@ -16,6 +14,7 @@ volatile lcd_t* g_lcd;
 void lcd_init(lcd_t* lcd) {
     g_lcd = lcd;
 
+#if REAL_HARDWARE
     ioport_init();
 
     ioport_set_pin_dir(g_lcd->d4, IOPORT_DIR_OUTPUT);
@@ -70,6 +69,7 @@ void lcd_init(lcd_t* lcd) {
     lcd_command_clear_display();
     lcd_command_cursor_or_display_shift(false, true);
     lcd_command_display_on_off(true, false, false);
+#endif
 }
 
 void lcd_write_lcd_string() {
@@ -147,6 +147,7 @@ void lcd_write_string_at_cursor(uint8_t* value, uint8_t length) {
 }
 
 void lcd_wait_busy_status() {
+#if REAL_HARDWARE
     bool is_busy;
 
     ioport_set_pin_dir(g_lcd->d4, IOPORT_DIR_INPUT);
@@ -176,6 +177,7 @@ void lcd_wait_busy_status() {
     ioport_set_pin_dir(g_lcd->d5, IOPORT_DIR_OUTPUT);
     ioport_set_pin_dir(g_lcd->d6, IOPORT_DIR_OUTPUT);
     ioport_set_pin_dir(g_lcd->d7, IOPORT_DIR_OUTPUT);
+#endif
 }
 
 void lcd_clear_upper() {
@@ -195,12 +197,18 @@ void lcd_clear_lower() {
 
 void lcd_command_clear_display() {
     lcd_driver_raw_send(clearDisplay, true);
+
+#if REAL_HARDWARE
     delay_us(2000);
+#endif
 }
 
 void lcd_command_return_home() {
     lcd_driver_raw_send(returnHome, true);
+
+#if REAL_HARDWARE
     delay_us(2000);
+#endif
 }
 
 void lcd_command_entry_mode_set(bool increment, bool display_shift) {
@@ -228,6 +236,7 @@ void lcd_command_set_ddram_address(uint8_t address) {
 }
 
 bool lcd_command_read_busy_flag() {
+#if REAL_HARDWARE
     ioport_set_pin_dir(g_lcd->d4, IOPORT_DIR_INPUT);
     ioport_set_pin_dir(g_lcd->d5, IOPORT_DIR_INPUT);
     ioport_set_pin_dir(g_lcd->d6, IOPORT_DIR_INPUT);
@@ -252,6 +261,9 @@ bool lcd_command_read_busy_flag() {
     ioport_set_pin_dir(g_lcd->d7, IOPORT_DIR_OUTPUT);
 
     return busy_flag;
+#else
+    return false;
+#endif
 }
 
 void lcd_driver_data_write(uint8_t value) {
@@ -259,6 +271,7 @@ void lcd_driver_data_write(uint8_t value) {
 }
 
 uint8_t lcd_driver_data_read() {
+#if REAL_HARDWARE
     ioport_set_pin_dir(g_lcd->d4, IOPORT_DIR_INPUT);
     ioport_set_pin_dir(g_lcd->d5, IOPORT_DIR_INPUT);
     ioport_set_pin_dir(g_lcd->d6, IOPORT_DIR_INPUT);
@@ -283,9 +296,13 @@ uint8_t lcd_driver_data_read() {
     ioport_set_pin_dir(g_lcd->d7, IOPORT_DIR_OUTPUT);
 
     return busy_flag;
+#else
+    return false;
+#endif
 }
 
 void lcd_driver_raw_send(uint8_t value, bool is_command) {
+#if REAL_HARDWARE
     ioport_set_pin_level(g_lcd->rs, !is_command);
     ioport_set_pin_level(g_lcd->rw, 0);
 
@@ -307,16 +324,26 @@ void lcd_driver_raw_send(uint8_t value, bool is_command) {
     // ioport_set_pin_level(lcd->d4, value & (1 << 0));
 
     lcd_driver_pulse_enable_pin();
+#else
+    if (!is_command) {
+        printf("%c", value);
+    }
+#endif
 }
 
 void lcd_driver_raw_data_pins_set(uint8_t value) {
+#if REAL_HARDWARE
     ioport_set_pin_level(g_lcd->d7, value & (1 << 3));
     ioport_set_pin_level(g_lcd->d6, value & (1 << 2));
     ioport_set_pin_level(g_lcd->d5, value & (1 << 1));
     ioport_set_pin_level(g_lcd->d4, value & (1 << 0));
+#else
+    (void)value;
+#endif
 }
 
 void lcd_driver_pulse_enable_pin() {
+#if REAL_HARDWARE
     ioport_set_pin_level(g_lcd->enable, 0);
     delay_us(1);
 
@@ -325,6 +352,7 @@ void lcd_driver_pulse_enable_pin() {
 
     ioport_set_pin_level(g_lcd->enable, 0);
     delay_us(100);
+#endif
 }
 
 

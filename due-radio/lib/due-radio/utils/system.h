@@ -1,7 +1,7 @@
 #ifndef UTILS_SYSTEM_H_
 #define UTILS_SYSTEM_H_
 
-#include "common.h"
+#include "due-radio/common.h"
 
 __EXTERN_C_BEGIN
 

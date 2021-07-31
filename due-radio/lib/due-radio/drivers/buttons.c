@@ -1,14 +1,14 @@
-#include "drivers/buttons.h"
-#include "app/runtime.h"
+#include "due-radio/drivers/buttons.h"
+#include "due-radio/app/runtime.h"
 
 __EXTERN_C_BEGIN
 
 volatile buttons_runtime_t* g_buttons;
 
-void buttons_init()
-{
+void buttons_init() {
 	g_buttons = runtime->buttons;
 
+#if REAL_HARDWARE
 	ioport_init();
 
 	ioport_enable_pin(PIO_PC26_IDX);
@@ -20,10 +20,12 @@ void buttons_init()
 	ioport_set_pin_dir(PIO_PC25_IDX, IOPORT_DIR_INPUT);
 	ioport_set_pin_dir(PIO_PC24_IDX, IOPORT_DIR_INPUT);
 	ioport_set_pin_dir(PIO_PC23_IDX, IOPORT_DIR_INPUT);
+#endif
 }
 
 void buttons_read()
 {
+#if REAL_HARDWARE
 	uint8_t state =
 		(!ioport_get_pin_level(PIO_PC26_IDX) << 3) |
 		(!ioport_get_pin_level(PIO_PC25_IDX) << 2) |
@@ -35,6 +37,7 @@ void buttons_read()
 	g_buttons->falling = old_state & ~state;
 
 	g_buttons->state = state;
+#endif
 }
 
 bool button_pressed(int button) {

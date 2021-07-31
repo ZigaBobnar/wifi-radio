@@ -1,7 +1,7 @@
 #ifndef DRIVERS_CLOCK_H_
 #define DRIVERS_CLOCK_H_
 
-#include "common.h"
+#include "due-radio/common.h"
 
 /**
  * Valid ranges for hardware RTC:

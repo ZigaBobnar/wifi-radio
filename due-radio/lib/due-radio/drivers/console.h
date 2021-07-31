@@ -1,9 +1,9 @@
 #ifndef DRIVERS_CONSOLE_H_
 #define DRIVERS_CONSOLE_H_
 
-#include "common.h"
-#include "utils/console_definitions.h"
-#include "utils/fifo.h"
+#include "due-radio/common.h"
+#include "due-radio/utils/console_definitions.h"
+#include "due-radio/utils/fifo.h"
 
 /**
  * Serial console interface
@@ -23,9 +23,6 @@
 #endif  // CONSOLE_RX_QUEUE_SIZE
 
 __EXTERN_C_BEGIN
-
-extern uint8_t console_rx_fifo_buff[CONSOLE_RX_QUEUE_SIZE];
-extern fifo_t console_rx_fifo;
 
 /**
  * Initializes the console by enabling the proper ioport, configuring the

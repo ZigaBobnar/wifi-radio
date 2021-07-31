@@ -1,11 +1,11 @@
-#include "app/ui.h"
-#include "runtime.h"
-#include "drivers/buttons.h"
-#include "drivers/lcd.h"
-#include "drivers/clock.h"
-#include "utils/timeguard.h"
-#include "utils/system.h"
-#include "app/audio_player.h"
+#include "due-radio/app/ui.h"
+#include "due-radio/app/runtime.h"
+#include "due-radio/drivers/buttons.h"
+#include "due-radio/drivers/lcd.h"
+#include "due-radio/drivers/clock.h"
+#include "due-radio/utils/timeguard.h"
+#include "due-radio/utils/system.h"
+#include "due-radio/app/audio_player.h"
 
 __EXTERN_C_BEGIN
 

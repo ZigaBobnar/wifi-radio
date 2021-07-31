@@ -1,7 +1,7 @@
 #ifndef DRIVERS_BUTTONS_H_
 #define DRIVERS_BUTTONS_H_
 
-#include "common.h"
+#include "due-radio/common.h"
 
 /**
  * Buttons driver interface

@@ -1,8 +1,8 @@
 #ifndef APP_AUDIO_PLAYER_H_
 #define APP_AUDIO_PLAYER_H_
 
-#include "common.h"
-#include "utils/fifo.h"
+#include "due-radio/common.h"
+#include "due-radio/utils/fifo.h"
 
 /**
  * Audio player implementation

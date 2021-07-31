@@ -1,10 +1,11 @@
-#include "app/runtime.h"
+#include "due-radio/app/runtime.h"
 
 //
 // LCD
 //
 static char lcd_buffer[33] = "                                ";
 static lcd_t lcd_instance = {
+#if REAL_HARDWARE
     .rs = LCD_RS_PIN,
     .rw = LCD_RW_PIN,
     .enable = LCD_ENABLE_PIN,
@@ -12,6 +13,15 @@ static lcd_t lcd_instance = {
     .d5 = LCD_D5_PIN,
     .d6 = LCD_D6_PIN,
     .d7 = LCD_D7_PIN,
+#else
+    .rs = 0,
+    .rw = 0,
+    .enable = 0,
+    .d4 = 0,
+    .d5 = 0,
+    .d6 = 0,
+    .d7 = 0,
+#endif
 
     ._lcd_string = lcd_buffer,
     .lcd_upper = lcd_buffer,
@@ -28,18 +38,18 @@ static dac_t dac_instance = {
 //
 // Audio player
 //
-static uint8_t audio_player_sample_buffer[AUDIO_PLAYER_SAMPLE_BUFFER_SIZE];
-static fifo_t audio_player_sample_buffer_fifo = {
-    .read_idx = 0,
-    .write_idx = 0,
-    .size = AUDIO_PLAYER_SAMPLE_BUFFER_SIZE,
-    .buffer = audio_player_sample_buffer,
-};
+// static uint8_t audio_player_sample_buffer[AUDIO_PLAYER_SAMPLE_BUFFER_SIZE];
+// static fifo_t audio_player_sample_buffer_fifo = {
+//     .read_idx = 0,
+//     .write_idx = 0,
+//     .size = AUDIO_PLAYER_SAMPLE_BUFFER_SIZE,
+//     .buffer = audio_player_sample_buffer,
+// };
 static audio_player_runtime_t audio_player_runtime_instance = {
     .is_running = false,
     .is_buffering = false,
     .buffered_samples = 0,
-    .buffer_fifo = &audio_player_sample_buffer_fifo,
+    .buffer_fifo = NULL //TODO //&audio_player_sample_buffer_fifo,
 };
 
 //

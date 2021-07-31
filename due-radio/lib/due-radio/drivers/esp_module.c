@@ -1,27 +1,21 @@
-#include "drivers/esp_module.h"
+#include "due-radio/drivers/esp_module.h"
+#include "due-radio/app/runtime.h"
+#include "due-radio/drivers/console.h"
+#include "due-radio/utils/timeguard.h"
+#include "due-radio/app/audio_player.h"
 #include <string.h>
-#include <stdarg.h>
-#include "app/runtime.h"
-#include "drivers/console.h"
-#include "utils/timeguard.h"
-#include "app/audio_player.h"
 
 __EXTERN_C_BEGIN
 
 uint8_t esp_rx_data = 0;
 
-uint8_t esp_rx_fifo_buff[ESP_RX_QUEUE_SIZE];
-fifo_t esp_rx_fifo = {
-    .read_idx = 0,
-    .write_idx = 0,
-    .size = ESP_RX_QUEUE_SIZE,
-    .buffer = esp_rx_fifo_buff,
-};
+fifo_t* esp_rx_fifo;
 
 bool reading_raw_chunk = false;
 
 void esp_module_hardware_setup()
 {
+#if REAL_HARDWARE
     pio_set_peripheral(PIOA, PIO_PERIPH_A, PIO_PA10A_RXD0 | PIO_PA11A_TXD0);
     pio_pull_up(PIOA, PIO_PA10A_RXD0 | PIO_PA11A_TXD0, PIO_PULLUP);
 
@@ -39,10 +33,14 @@ void esp_module_hardware_setup()
 
     USART0->US_IER = US_IER_RXRDY;
     NVIC_EnableIRQ(USART0_IRQn);
+#endif
+
+    esp_rx_fifo = fifo_create(ESP_RX_QUEUE_SIZE);
 }
 
 bool esp_module_init()
 {
+#if REAL_HARDWARE
     int8_t retries_left = 10;
 
     while (retries_left >= 0)
@@ -74,12 +72,16 @@ bool esp_module_init()
     }
 
     return false;
+#else
+    return true;
+#endif
 }
 
 bool esp_module_wifi_connect(const char *ssid, const char *password)
 {
     console_put_line("ESP> Sending wifi connect command");
 
+#if REAL_HARDWARE
     esp_module_clear_status();
 
     esp_module_tx_put_formatted("connect %s %s", ssid, password);
@@ -101,32 +103,42 @@ bool esp_module_wifi_connect(const char *ssid, const char *password)
     }
 
     return false;
+#else
+    (void)ssid;
+    (void)password;
+    return true;
+#endif
 }
 
 void esp_module_play_next()
 {
     console_put_line("ESP> Sending play next command");
 
+#if REAL_HARDWARE
     esp_module_clear_status();
     esp_module_tx_put_line("play_next");
     delay_ms(10);
     esp_module_clear_status();
+#endif
 }
 
 void esp_module_play_previous()
 {
     console_put_line("ESP> Sending play previous command");
 
+#if REAL_HARDWARE
     esp_module_clear_status();
     esp_module_tx_put_line("play_previous");
     delay_ms(10);
     esp_module_clear_status();
+#endif
 }
 
 currently_playing_info *esp_module_get_currently_playing()
 {
     console_put_line("ESP> Querying currently playing track");
 
+#if REAL_HARDWARE
     esp_module_clear_status();
     esp_module_tx_put_line("get_currently_playing");
 
@@ -205,12 +217,22 @@ currently_playing_info *esp_module_get_currently_playing()
     }
 
     return NULL;
+#else
+    currently_playing_info *result = calloc(1, sizeof(currently_playing_info));
+    result->track.track_length_ms = 173426;
+    result->track.sampling_frequency = 44100;
+    result->current_chunk = 24;
+    result->track.total_chunks = 355;
+
+    return result;
+#endif
 }
 
 track_info *esp_module_get_track_info(int track_id)
 {
     console_put_formatted("ESP> Querying track id: %i", track_id);
 
+#if REAL_HARDWARE
     esp_module_clear_status();
     esp_module_tx_put_formatted("get_track_info %i", track_id);
 
@@ -277,12 +299,23 @@ track_info *esp_module_get_track_info(int track_id)
     }
 
     return NULL;
+#else
+    (void)track_id;
+
+    track_info *result = calloc(1, sizeof(track_info));
+    result->track_length_ms = 134332;
+    result->sampling_frequency = 44100;
+    result->total_chunks = 340;
+
+    return result;
+#endif
 }
 
 int esp_module_get_chunk(int track_id, int chunk_index)
 {
     console_put_formatted("ESP> Retrieving chunk %i for track id: %i", chunk_index, track_id);
 
+#if REAL_HARDWARE
     runtime->player->is_buffering = true;
 
     esp_module_clear_status();
@@ -340,22 +373,32 @@ int esp_module_get_chunk(int track_id, int chunk_index)
     }*/
 
     return 0;
+
+#else
+    (void)track_id;
+    (void)chunk_index;
+
+    return 0;
+#endif
 }
 
 void esp_module_get_next_chunk()
 {
     console_put_formatted("ESP> Retrieving next chunk");
 
+#if REAL_HARDWARE
     runtime->player->is_buffering = true;
 
     esp_module_clear_status();
     esp_module_tx_put_formatted("get_next_chunk");
+#endif
 }
 
 current_time *esp_module_get_current_time()
 {
     console_put_line("ESP> Querying current time");
 
+#if REAL_HARDWARE
     esp_module_clear_status();
     esp_module_tx_put_line("get_current_time");
 
@@ -390,6 +433,17 @@ current_time *esp_module_get_current_time()
     }
 
     return NULL;
+#else
+    current_time *result = calloc(1, sizeof(current_time));
+    result->year = 2021;
+    result->month = 4;
+    result->day = 24;
+    result->hour = 13;
+    result->minutes = 45;
+    result->seconds = 24;
+
+    return result;
+#endif
 }
 
 /*void esp_module_start_stream() {
@@ -416,18 +470,22 @@ current_time *esp_module_get_current_time()
 
 void esp_module_tx_put_char(uint8_t value)
 {
+#if REAL_HARDWARE
     while (!(USART0->US_CSR & US_CSR_TXRDY))
     {
     }
 
     USART0->US_THR = US_THR_TXCHR(value);
+#else
+    (void)value;
+#endif
 }
 
 void esp_module_tx_put_line(const char *value)
 {
     console_put_formatted("ESP(TX)> %s", value);
 
-    for (int i = 0; i < strlen(value); i++)
+    for (size_t i = 0; i < strlen(value); i++)
     {
         esp_module_tx_put_char(value[i]);
     }
@@ -452,7 +510,7 @@ void esp_module_tx_put_formatted(const char *format, ...)
 
 bool esp_module_rx_read()
 {
-    return (fifo_read(&esp_rx_fifo, &esp_rx_data, 1) == 1);
+    return (fifo_read(esp_rx_fifo, &esp_rx_data, 1) == 1);
 }
 
 bool esp_module_rx_read_wait()
@@ -479,7 +537,7 @@ bool esp_module_rx_read_wait_timeout(const int32_t timeout_ms)
 char *esp_module_rx_read_line(size_t max_length, int32_t timeout_ms)
 {
     char *response = calloc(max_length + 1, sizeof(char));
-    int response_index = 0;
+    size_t response_index = 0;
 
     do
     {
@@ -517,12 +575,12 @@ char *esp_module_rx_read_line(size_t max_length, int32_t timeout_ms)
 
 bool esp_module_rx_char_ready()
 {
-    return fifo_has_next_item(&esp_rx_fifo);
+    return fifo_has_next_item(esp_rx_fifo);
 }
 
 void esp_module_rx_wait_until_char_ready()
 {
-    while (!fifo_has_next_item(&esp_rx_fifo))
+    while (!fifo_has_next_item(esp_rx_fifo))
     {
     }
 }
@@ -530,19 +588,22 @@ void esp_module_rx_wait_until_char_ready()
 void esp_module_clear_status()
 {
     esp_module_rx_clear_queue();
+
+#if REAL_HARDWARE
     usart_reset_status(USART0);
+#endif
 }
 
 void esp_module_rx_clear_queue()
 {
-    fifo_discard(&esp_rx_fifo);
+    fifo_reset(esp_rx_fifo);
 }
 
 uint8_t esp_module_rx_get_char()
 {
     uint8_t buf;
 
-    fifo_read(&esp_rx_fifo, &buf, 1);
+    fifo_read(esp_rx_fifo, &buf, 1);
 
     return buf;
 }
@@ -551,13 +612,14 @@ uint8_t esp_module_rx_peek_char()
 {
     uint8_t buf;
 
-    fifo_peek(&esp_rx_fifo, &buf, 1);
+    fifo_peek(esp_rx_fifo, &buf, 1);
 
     return buf;
 }
 
 void USART0_Handler()
 {
+#if REAL_HARDWARE
     static char line_buff[255];
     static int line_idx = 0;
 
@@ -567,7 +629,7 @@ void USART0_Handler()
         uint8_t recv = USART0->US_RHR;
 
         if (!runtime->player->is_buffering) {
-            fifo_write_single(&esp_rx_fifo, recv);
+            fifo_write_single(esp_rx_fifo, recv);
 
             if (recv != '\n') {
                 *(line_buff + line_idx) = recv;
@@ -590,6 +652,7 @@ void USART0_Handler()
             // }
         }
     }
+#endif
 }
 
 __EXTERN_C_END

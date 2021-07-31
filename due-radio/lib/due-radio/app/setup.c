@@ -1,13 +1,13 @@
-#include "app/setup.h"
-#include "app/runtime.h"
-#include "drivers/lcd.h"
-#include "drivers/dac.h"
-#include "drivers/clock.h"
-#include "drivers/esp_module.h"
-#include "drivers/console.h"
-#include "utils/timeguard.h"
-#include "app/ui.h"
-#include "app/audio_player.h"
+#include "due-radio/app/setup.h"
+#include "due-radio/app/runtime.h"
+#include "due-radio/drivers/lcd.h"
+#include "due-radio/drivers/dac.h"
+#include "due-radio/drivers/clock.h"
+#include "due-radio/drivers/esp_module.h"
+#include "due-radio/drivers/console.h"
+#include "due-radio/utils/timeguard.h"
+#include "due-radio/app/ui.h"
+#include "due-radio/app/audio_player.h"
 
 __EXTERN_C_BEGIN
 
@@ -35,11 +35,11 @@ bool setup_begin(void) {
 
     if (!setup_esp_module())
         return false;
-    int32_t esp_time = timeguard_get_time_ms();
+    // int32_t esp_time = timeguard_get_time_ms();
 
     if (!setup_esp_wifi())
         return false;
-    int32_t wifi_time = timeguard_get_time_ms();
+    // int32_t wifi_time = timeguard_get_time_ms();
 
     if (!setup_timesync())
         return false;
@@ -47,7 +47,7 @@ bool setup_begin(void) {
 
     if (!setup_player())
         return false;
-    int32_t player_time = timeguard_get_time_ms();
+    // int32_t player_time = timeguard_get_time_ms();
 
     lcd_write_lower_formatted("ESP module OK");
 
@@ -66,8 +66,10 @@ bool setup_begin(void) {
 }
 
 bool setup_hardware(void) {
+#if REAL_HARDWARE
     delay_init();
     ioport_init();
+#endif
     timeguard_init();
     ui_init();
     clock_init(); // Custom RTC clock driver
@@ -84,7 +86,9 @@ bool setup_lcd(void) {
     lcd_write_upper_formatted("WiFi radio init");
     lcd_write_lower_formatted("LCD OK");
 
+#if REAL_HARDWARE
     delay_ms(100);
+#endif
 
     return true;
 }
@@ -103,7 +107,9 @@ bool setup_console() {
         CONSOLE_VT100_COLOR_TEXT_DEFAULT);
     console_put_line("==> WiFi radio boot setup...");
 
+#if REAL_HARDWARE
     delay_ms(100);
+#endif
 
     return true;
 }
@@ -117,8 +123,10 @@ bool setup_dac(void) {
 
     lcd_write_lower_formatted("DAC OK");
 
+#if REAL_HARDWARE
     delay_ms(100);
-    
+#endif
+
     return true;
 }
 
@@ -129,7 +137,9 @@ bool setup_esp_module(void) {
     console_put_line("\tESP module hardware setup...");
     esp_module_hardware_setup();
 
+#if REAL_HARDWARE
     delay_ms(100);
+#endif
 
     console_put_line("\tESP module hardware setup OK");
 

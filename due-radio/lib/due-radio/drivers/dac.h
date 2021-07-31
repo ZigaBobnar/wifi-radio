@@ -1,8 +1,7 @@
 #ifndef DRIVERS_DAC_H_
 #define DRIVERS_DAC_H_
 
-#include "common.h"
-#include <dacc.h>
+#include "due-radio/common.h"
 
 /**
  * DAC (Digital to analog converter) interface
@@ -10,6 +9,7 @@
  * This interface uses hardware DACC.
  */
 
+#if REAL_HARDWARE
 #if !defined(DAC_CHANNEL)
 #error DAC configuration must be fully defined.
 #endif
@@ -17,6 +17,7 @@
 #define DACC_ANALOG_CONTROL (DACC_ACR_IBCTLCH0(0x02) \
 	| DACC_ACR_IBCTLCH1(0x02) \
 	| DACC_ACR_IBCTLDACCORE(0x01))
+#endif
 
 __EXTERN_C_BEGIN
 

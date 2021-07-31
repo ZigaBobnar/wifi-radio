@@ -1,7 +1,7 @@
 #ifndef APP_UI_H_
 #define APP_UI_H_
 
-#include "common.h"
+#include "due-radio/common.h"
 
 /**
  * User interface processor for the project.

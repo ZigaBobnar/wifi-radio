@@ -1,23 +1,25 @@
-#include "app/audio_player.h"
+#include "due-radio/app/audio_player.h"
 
 #include <time.h>
-#include "app/runtime.h"
-#include "drivers/dac.h"
-#include "drivers/esp_module.h"
-#include "drivers/console.h"
-#include "utils/timeguard.h"
+#include "due-radio/app/runtime.h"
+#include "due-radio/drivers/dac.h"
+#include "due-radio/drivers/esp_module.h"
+#include "due-radio/drivers/console.h"
+#include "due-radio/utils/timeguard.h"
 
 __EXTERN_C_BEGIN
 
 void audio_player_init() {
-	fifo_discard(runtime->player->buffer_fifo);
+	fifo_reset(runtime->player->buffer_fifo);
 	runtime->player->buffered_samples = 0;
 	runtime->player->is_buffering = false;
 	runtime->player->is_running = false;
 
+#if REAL_HARDWARE
 	sysclk_enable_peripheral_clock(ID_TC0);
     tc_init(TC0, 0, TC_CMR_TCCLKS_TIMER_CLOCK3 | TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC);
 	tc_enable_interrupt(TC0, 0, TC_IER_CPCS);
+#endif
 }
 
 void audio_player_start() {
@@ -25,12 +27,14 @@ void audio_player_start() {
 
 	runtime->player->is_running = true;
 
+#if REAL_HARDWARE
 	float T_ms = 1000.0 / AUDIO_PLAYER_SAMPLE_FREQUENCY;
 	// tc_write_rc(TC0, 0, (uint32_t)(T_ms * CLOCKS_PER_SEC * 32));
 	tc_write_rc(TC0, 0, (uint32_t)(T_ms * CLOCKS_PER_SEC * 25));
 
 	NVIC_EnableIRQ(TC0_IRQn);
     tc_start(TC0, 0);
+#endif
 }
 
 void audio_player_stop() {
@@ -38,8 +42,10 @@ void audio_player_stop() {
 
 	runtime->player->is_running = false;
 
+#if REAL_HARDWARE
 	NVIC_DisableIRQ(TC0_IRQn);
 	tc_stop(TC0, 0);
+#endif
 }
 
 void TC0_Handler() {
@@ -52,7 +58,9 @@ void TC0_Handler() {
 		runtime->player->buffered_samples--;
 	}
 
+#if REAL_HARDWARE
 	tc_get_status(TC0, 0);
+#endif
 }
 
 void audio_player_ensure_buffered(void) {

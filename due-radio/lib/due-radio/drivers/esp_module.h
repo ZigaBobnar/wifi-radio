@@ -1,8 +1,8 @@
 #ifndef DRIVERS_ESP_MODULE_H_
 #define DRIVERS_ESP_MODULE_H_
 
-#include "common.h"
-#include "utils/fifo.h"
+#include "due-radio/common.h"
+#include "due-radio/utils/fifo.h"
 
 /**
  * ESP module board driver
@@ -21,8 +21,7 @@ __EXTERN_C_BEGIN
 
 extern uint8_t esp_rx_data;
 
-extern uint8_t esp_rx_fifo_buff[ESP_RX_QUEUE_SIZE];
-extern fifo_t esp_rx_fifo;
+extern fifo_t* esp_rx_fifo;
 
 extern bool reading_raw_chunk;
 

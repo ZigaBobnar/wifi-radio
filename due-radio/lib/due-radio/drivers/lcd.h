@@ -18,7 +18,7 @@
 * PIN16 -> (Optional) K - Cathode for LED backlight - Negative terminal
 */
 
-#include "common.h"
+#include "due-radio/common.h"
 
 #if !defined(LCD_RS_PIN) || !defined(LCD_RW_PIN) || !defined(LCD_ENABLE_PIN) || !defined(LCD_D4_PIN) || !defined(LCD_D5_PIN) || !defined(LCD_D6_PIN) || !defined(LCD_D7_PIN)
 #error LCD connection configuration must be fully defined.
